@@ -1,6 +1,17 @@
 {
   "dependencies": {
+    "@typescript-eslint/eslint-plugin": "6.4.0",
     "dotenv": "^16.4.4",
+    "eslint": "8.0.1",
+    "eslint-config-standard-with-typescript": "^43.0.1",
+    "eslint-plugin-import": "2.25.2",
+    "eslint-plugin-n": "15.0.0",
+    "eslint-plugin-promise": "^6.1.1",
     "typescript": "^5.3.3"
-  }
+  },
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "author": "sanine",
+  "license": "MIT"
 }
