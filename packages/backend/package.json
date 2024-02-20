@@ -8,6 +8,7 @@
   "author": "sanine",
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^20.11.19",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "8.2.0",
@@ -21,6 +22,8 @@
     "typescript": "^5.3.3"
   },
   "scripts": {
+    "build": "yarn run tsc",
+    "start": "yarn build && node lib/index.js",
     "lint": "yarn run eslint . --ext .ts",
     "lint:fix": "eslint . --fix --ext .ts"
   }
