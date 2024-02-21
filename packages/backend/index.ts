@@ -4,7 +4,34 @@ const http = require('node:http');
 const url = require('node:url');
 const { parse } = require('csv-parse');
 
-function getSites(): Promise<[typeof http.ClientRequest, string[][]]> {
+interface MonitoringSite {
+  StationID: string;
+  AQSID: string;
+  FullAQSID: string;
+  MonitorType: string;
+  Parameter: string;
+  SiteCode: string;
+  SiteName: string;
+  Status: string;
+  AgencyID: string;
+  AgencyName: string;
+  EPARegion: string;
+  Latitude: string;
+  Longitude: string;
+  Elevation: string;
+  GMTOffset: string;
+  CountryFIPS: string;
+  CBSA_ID: string;
+  CBSA_Name: string;
+  StateAQSCode: string;
+  StateAbbreviation: string;
+  CountyAQSCode: string;
+  CountyName: string;
+}
+
+/** get the full list of sites from AirNow */
+function getSites()
+  : Promise<[typeof http.ClientRequest, MonitoringSite[]]> {
   return new Promise((resolve) => {
     const u = new url.URL('https://s3-us-west-1.amazonaws.com//files.airnowtech.org/airnow/today/Monitoring_Site_Locations_V2.dat');
     https.get(u, (res: typeof http.ClientRequest) => {
@@ -22,7 +49,46 @@ function getSites(): Promise<[typeof http.ClientRequest, string[][]]> {
         console.error(err.message);
       });
       parser.on('end', () => {
-        resolve([res, records]);
+        const keys: any = Object.fromEntries(
+          (records[0] || []).map((x, i) => [x, i])
+        );
+        console.log(keys);
+        const getKey = (arr: string[], key: string) => {
+          const value = arr[keys[key]];
+          if (value !== null && value !== undefined) { 
+            return value;
+          } else {
+            throw new Error(`could not find key ${key} in array ${arr}`);
+          }
+        };
+        const result = records.slice(1).map((values) => {
+          const obj: MonitoringSite = {
+            StationID: getKey(values, 'StationID'),
+            AQSID: getKey(values, 'AQSID'),
+            FullAQSID: getKey(values, 'FullAQSID'),
+            MonitorType: getKey(values, 'MonitorType'),
+            Parameter: getKey(values, 'Parameter'),
+            SiteCode: getKey(values, 'SiteCode'),
+            SiteName: getKey(values, 'SiteName'),
+            Status: getKey(values, 'Status'),
+            AgencyID: getKey(values, 'AgencyID'),
+            AgencyName: getKey(values, 'AgencyName'),
+            EPARegion: getKey(values, 'EPARegion'),
+            Latitude: getKey(values, 'Latitude'),
+            Longitude: getKey(values, 'Longitude'),
+            Elevation: getKey(values, 'Elevation'),
+            GMTOffset: getKey(values, 'GMTOffset'),
+            CountryFIPS: getKey(values, 'CountryFIPS'),
+            CBSA_ID: getKey(values, 'CBSA_ID'),
+            CBSA_Name: getKey(values, 'CBSA_Name'),
+            StateAQSCode: getKey(values, 'StateAQSCode'),
+            StateAbbreviation: getKey(values, 'StateAbbreviation'),
+            CountyAQSCode: getKey(values, 'CountyAQSCode'),
+            CountyName: getKey(values, 'CountyName'),
+          };
+          return obj;
+        });
+        resolve([res, result]);
       });
     });
   });
@@ -67,7 +133,7 @@ function getLatLong(
   });
 }
 
-getLatLong(process.env.API_KEY as string, 45, -90).then(([_, obj]) => {
+/* getLatLong(process.env.API_KEY as string, 45, -90).then(([_, obj]) => {
   obj.forEach((x) => console.log(x.ParameterName, x.Latitude, x.Longitude));
-});
-// getSites().then(([_, records]) => console.log(records[0]));
+}); //*/
+getSites().then(([_, records]) => console.log(records[0]));
