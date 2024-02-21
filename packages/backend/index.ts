@@ -94,6 +94,9 @@ function getSites()
 }
 
 
+function toRadians(degrees: number): number {
+  return Math.PI * (degrees/180);
+}
 function greatCircleDist(
   radius: number,
   lat1: number,
@@ -102,8 +105,8 @@ function greatCircleDist(
   long2: number
 ): number {
   return radius * Math.acos(
-    (Math.sin(lat1) * Math.sin(lat2)) +
-    (Math.cos(lat1) * Math.cos(lat2) * Math.cos(Math.abs(long1 - long2)))
+    (Math.sin(toRadians(lat1)) * Math.sin(toRadians(lat2))) +
+    (Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.cos(toRadians(Math.abs(long1 - long2))))
   );
 }
 
