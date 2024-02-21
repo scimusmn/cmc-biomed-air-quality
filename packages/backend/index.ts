@@ -52,7 +52,6 @@ function getSites()
         const keys: any = Object.fromEntries(
           (records[0] || []).map((x, i) => [x, i])
         );
-        console.log(keys);
         const getKey = (arr: string[], key: string) => {
           const value = arr[keys[key]];
           if (value !== null && value !== undefined) { 
@@ -92,6 +91,40 @@ function getSites()
       });
     });
   });
+}
+
+
+function greatCircleDist(
+  radius: number,
+  lat1: number,
+  long1: number,
+  lat2: number,
+  long2: number
+): number {
+  return radius * Math.acos(
+    (Math.sin(lat1) * Math.sin(lat2)) +
+    (Math.cos(lat1) * Math.cos(lat2) * Math.cos(Math.abs(long1 - long2)))
+  );
+}
+
+
+const EARTH_RADIUS = 6378.137; // kilometers
+async function getNearbyActiveSites(
+  latitude: number,
+  longitude: number,
+  maxDist: number
+): Promise<[typeof http.ClientRequest, MonitoringSite[]]> {
+  const [res, sites] = await getSites();
+  const filteredSites = sites
+    .filter((site) => site.Status === 'Active')
+    .filter(
+      (site) => maxDist >= greatCircleDist(
+        EARTH_RADIUS,
+        Number(site.Latitude), Number(site.Longitude),
+        latitude, longitude
+      )
+    );
+  return [res, filteredSites];
 }
 
 interface Observation {
@@ -136,4 +169,13 @@ function getLatLong(
 /* getLatLong(process.env.API_KEY as string, 45, -90).then(([_, obj]) => {
   obj.forEach((x) => console.log(x.ParameterName, x.Latitude, x.Longitude));
 }); //*/
-getSites().then(([_, records]) => console.log(records[0]));
+(async () => {
+  const [_, sites] = await getNearbyActiveSites(45, -90, 100);
+  sites.forEach((site) => {
+    console.log(site, greatCircleDist(
+      EARTH_RADIUS,
+      Number(site.Latitude), Number(site.Longitude),
+      45, -90
+    ));
+  });
+})();
