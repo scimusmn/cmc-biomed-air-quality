@@ -31,7 +31,7 @@ interface MonitoringSite {
 
 /** get the full list of sites from AirNow */
 function getSites()
-  : Promise<[typeof http.ClientRequest, MonitoringSite[]]> {
+: Promise<[typeof http.ClientRequest, MonitoringSite[]]> {
   return new Promise((resolve) => {
     const u = new url.URL('https://s3-us-west-1.amazonaws.com//files.airnowtech.org/airnow/today/Monitoring_Site_Locations_V2.dat');
     https.get(u, (res: typeof http.ClientRequest) => {
@@ -50,15 +50,14 @@ function getSites()
       });
       parser.on('end', () => {
         const keys: any = Object.fromEntries(
-          (records[0] || []).map((x, i) => [x, i])
+          (records[0] || []).map((x, i) => [x, i]),
         );
         const getKey = (arr: string[], key: string) => {
           const value = arr[keys[key]];
-          if (value !== null && value !== undefined) { 
+          if (value !== null && value !== undefined) {
             return value;
-          } else {
-            throw new Error(`could not find key ${key} in array ${arr}`);
           }
+          throw new Error(`could not find key ${key} in array ${arr}`);
         };
         const result = records.slice(1).map((values) => {
           const obj: MonitoringSite = {
@@ -93,29 +92,31 @@ function getSites()
   });
 }
 
-
 function toRadians(degrees: number): number {
-  return Math.PI * (degrees/180);
+  return Math.PI * (degrees / 180);
 }
 function greatCircleDist(
   radius: number,
   lat1: number,
   long1: number,
   lat2: number,
-  long2: number
+  long2: number,
 ): number {
   return radius * Math.acos(
-    (Math.sin(toRadians(lat1)) * Math.sin(toRadians(lat2))) +
-    (Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.cos(toRadians(Math.abs(long1 - long2))))
+    (Math.sin(toRadians(lat1)) * Math.sin(toRadians(lat2)))
+    + (
+      Math.cos(toRadians(lat1))
+      * Math.cos(toRadians(lat2))
+      * Math.cos(toRadians(Math.abs(long1 - long2)))
+    ),
   );
 }
-
 
 const EARTH_RADIUS = 6378.137; // kilometers
 async function getNearbyActiveSites(
   latitude: number,
   longitude: number,
-  maxDist: number
+  maxDist: number,
 ): Promise<[typeof http.ClientRequest, MonitoringSite[]]> {
   const [res, sites] = await getSites();
   const filteredSites = sites
@@ -123,9 +124,11 @@ async function getNearbyActiveSites(
     .filter(
       (site) => maxDist >= greatCircleDist(
         EARTH_RADIUS,
-        Number(site.Latitude), Number(site.Longitude),
-        latitude, longitude
-      )
+        Number(site.Latitude),
+        Number(site.Longitude),
+        latitude,
+        longitude,
+      ),
     );
   return [res, filteredSites];
 }
@@ -171,14 +174,16 @@ function getLatLong(
 
 /* getLatLong(process.env.API_KEY as string, 45, -90).then(([_, obj]) => {
   obj.forEach((x) => console.log(x.ParameterName, x.Latitude, x.Longitude));
-}); //*/
+}); // */
 (async () => {
   const [_, sites] = await getNearbyActiveSites(45, -90, 100);
   sites.forEach((site) => {
     console.log(site, greatCircleDist(
       EARTH_RADIUS,
-      Number(site.Latitude), Number(site.Longitude),
-      45, -90
+      Number(site.Latitude),
+      Number(site.Longitude),
+      45,
+      -90,
     ));
   });
 })();
