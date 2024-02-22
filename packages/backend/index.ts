@@ -146,19 +146,9 @@ interface Observation {
   Category: { Number: number; Name: string };
 }
 
-function getLatLong(
-  token: string,
-  latitude: number,
-  longitude: number,
-): Promise<[typeof http.ClientRequest, [Observation]]> {
+function getJson(u: typeof url.URL): Promise<[typeof http.ClientRequest, [Observation]]> {
   return new Promise((resolve) => {
-    const u = new url.URL('https://www.airnowapi.org/aq/observation/latLong/current/');
-    u.searchParams.append('latitude', latitude);
-    u.searchParams.append('longitude', longitude);
-    u.searchParams.append('distance', 150);
-    u.searchParams.append('format', 'application/json');
-    u.searchParams.append('API_KEY', token);
-    https.get(u, (res: typeof http.ClientRequest) => {
+     https.get(u, (res: typeof http.ClientRequest) => {
       let body = '';
       res.on('data', (chunk: string) => {
         body += chunk;
@@ -171,19 +161,67 @@ function getLatLong(
     });
   });
 }
+async function getLatLong(
+  token: string,
+  latitude: number,
+  longitude: number,
+): Promise<[typeof http.ClientRequest, [Observation]]> {
+  const u = new url.URL('https://www.airnowapi.org/aq/observation/latLong/current/');
+  u.searchParams.append('latitude', latitude);
+  u.searchParams.append('longitude', longitude);
+  u.searchParams.append('distance', 150);
+  u.searchParams.append('format', 'application/json');
+  u.searchParams.append('API_KEY', token);
+  return await getJson(u);
+}
 
-/* getLatLong(process.env.API_KEY as string, 45, -90).then(([_, obj]) => {
-  obj.forEach((x) => console.log(x.ParameterName, x.Latitude, x.Longitude));
-}); // */
+// helper function, convert Date to YYYY-MM-DD format
+function yyyy_mm_dd(date: Date): string {
+  const d = new Date(date);
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().substring(0, 10);
+}
+
+// retrieve observations from a lat/long on a specific date
+async function getHistoricalLatLong(
+  token: string,
+  latitude: number,
+  longitude: number,
+  date: Date
+): Promise<[typeof http.ClientRequest, [Observation]]> {
+  const u = new url.URL('https://www.airnowapi.org/aq/observation/latLong/historical/');
+  u.searchParams.append('latitude', latitude);
+  u.searchParams.append('longitude', longitude);
+  u.searchParams.append('date', yyyy_mm_dd(date));
+  u.searchParams.append('distance', 150);
+  u.searchParams.append('format', 'application/json');
+  u.searchParams.append('API_KEY', token);
+  return await getJson(u);
+}
+
+// cincinnati latitude & longitude
+const CINCI_LAT = 39.1;
+const CINCI_LONG = -84.5125;
+
+// test retrieving data from specific location and time
 (async () => {
-  const [_, sites] = await getNearbyActiveSites(45, -90, 100);
+  if (typeof process.env.API_KEY === 'string') {
+    const [_, observations] = await getHistoricalLatLong(process.env.API_KEY, CINCI_LAT, CINCI_LONG, new Date('January 1, 2024'));
+    console.log(observations);
+  } else {
+    console.error(`expected API_KEY to be a string, but got ${process.env.API_KEY} instead`);
+  }
+})(); // */
+
+// test retrieving location data
+/* (async () => {
+  const [_, sites] = await getNearbyActiveSites(CINCI_LAT, CINCI_LONG, 100);
   sites.forEach((site) => {
     console.log(site, greatCircleDist(
       EARTH_RADIUS,
       Number(site.Latitude),
       Number(site.Longitude),
-      45,
-      -90,
+      CINCI_LAT, CINCI_LONG
     ));
   });
-})();
+})(); // */
