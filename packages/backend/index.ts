@@ -179,7 +179,7 @@ async function getLatLong(
 function yyyy_mm_dd(date: Date): string {
   const d = new Date(date);
   d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-  return d.toISOString().substring(0, 10);
+  return d.toISOString().substring(0, 10) + 'T00-0000';
 }
 
 // retrieve observations from a lat/long on a specific date
@@ -196,6 +196,7 @@ async function getHistoricalLatLong(
   u.searchParams.append('distance', 150);
   u.searchParams.append('format', 'application/json');
   u.searchParams.append('API_KEY', token);
+  console.log(u.toString());
   return await getJson(u);
 }
 
