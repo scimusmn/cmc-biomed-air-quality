@@ -64,7 +64,7 @@ function toUtc(date: Date): Date {
 }
 
 // get observations from a specific date & time
-export async function getObservations(date: Date): Promise<Observation[]> {
+export async function getObservations(date: Date): Promise<[http.IncomingMessage, Observation[]]> {
   const d = toUtc(date);
   const z = (x: number) => String(x).padStart(2, '0');
   const yyyy = String(d.getFullYear());
@@ -87,12 +87,18 @@ export async function getObservations(date: Date): Promise<Observation[]> {
   });
   const msg = await getStream(url);
   msg.pipe(csv);
-  await stream.finished(csv);
+  try {
+    await stream.finished(csv);
+  } catch (err) {
+    // this probably means a parse error, which probably means a 404
+    // console.error(err);
+    return [msg, []];
+  }
+
   const keys: Record<string, number> = {};
   (records[0]||[]).forEach((k, i) => keys[k] = i);
   const k = (r: string[], key: string) => r[keys[key] || r.length] || '';
-  console.log(keys);
-  return records.slice(1).map((r) => ({
+  return [msg, records.slice(1).map((r) => ({
     AQSID: k(r, 'AQSID'),
     SiteName: k(r, 'SiteName'),
     Status: k(r, 'Status'),
@@ -127,18 +133,24 @@ export async function getObservations(date: Date): Promise<Observation[]> {
     SO2_Unit: k(r, 'SO2_Unit'),
     PM10: k(r, 'PM10'),
     PM10_Unit: k(r, 'PM10_Unit'),
-  }));
+  }))];
 }
 
 // get the most recent observations
-export async function getCurrentObservations(): Promise<Observation[]> {
-	const d = new Date(); // current time
-	try {
-	  return await getObservations(d);
-	} catch(_: any) {
-	  d.setHours(d.getHours() - 1);
-	  return await getObservations(d);
-	}
+async function recursiveGetCurrent(depth: number, maxDepth: number): Promise<[http.IncomingMessage, Observation[]]> {
+  const d = new Date();
+  console.log(`pass ${depth}`);
+  d.setHours(d.getHours() - depth);
+  const [msg, obs] = await getObservations(d);
+  if (msg.statusCode === 200) {
+    // everything is fine c:
+    return [msg, obs]
+  } else {
+    return await recursiveGetCurrent(depth+1, maxDepth);
+  }
+}
+export async function getCurrentObservations(): Promise<[http.IncomingMessage, Observation[]]> {
+  return await recursiveGetCurrent(0, 10);
 }
 
 // convert degrees to radians
