@@ -122,3 +122,31 @@ export async function getObservations(date: Date): Promise<Observation[]> {
     PM10_Unit: r[33] || '',
   }));
 }
+
+function toRadians(degrees: number): number {
+  return Math.PI * (degrees / 180);
+}
+function greatCircleDist(
+  radius: number,
+  lat1: number,
+  long1: number,
+  lat2: number,
+  long2: number,
+): number {
+  return radius * Math.acos(
+    (Math.sin(toRadians(lat1)) * Math.sin(toRadians(lat2)))
+    + (
+      Math.cos(toRadians(lat1))
+      * Math.cos(toRadians(lat2))
+      * Math.cos(toRadians(Math.abs(long1 - long2)))
+    ),
+  );
+}
+
+const EARTH_RADIUS = 6378.137; // kilometers
+export function distanceFilter(latitude: number, longitude: number, maxDistance: number): (o: Observation) => boolean {
+  return (o: Observation) => {
+		const distance = greatCircleDist(EARTH_RADIUS, Number(o.Latitude), Number(o.Longitude), latitude, longitude);
+		return distance <= maxDistance;
+	};
+}
