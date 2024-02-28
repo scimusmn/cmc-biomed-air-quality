@@ -4,20 +4,38 @@ import * as https from 'node:https';
 import * as stream from 'node:stream/promises';
 import { parse } from 'csv-parse';
 
+export enum ResultType {
+  Ok = 'resulttype-ok',
+  Fail = 'resulttype-fail',
+}
+
+export interface Ok<T> {
+  type: typeof ResultType.Ok;
+  value: T;
+}
+const Ok = <T> (value: T): Ok<T> => ({ type: ResultType.Ok, value });
+
+interface Fail<T> {
+  type: typeof ResultType.Fail;
+  value: T;
+}
+const Fail = <T> (value: T): Fail<T> => ({ type: ResultType.Fail, value });
+
+type Result<L, R> = Ok<L> | Fail<R>
+
+enum Failure {
+  HttpsRequest,
+  ParsePipeline,
+}
+
 // helper function for asynchronous HTTPS GET
-export function getStream(url: nodeUrl.URL): Promise<http.IncomingMessage> {
+export function getStream(url: nodeUrl.URL): Promise<Result<http.IncomingMessage, Failure>> {
   return new Promise((resolve) => {
-    https.get(url, resolve);
+    const req = https.get(url, (res) => resolve(Ok(res)));
+    req.on('error', () => resolve(Fail(Failure.HttpsRequest)));
   });
 }
 
-export async function getText(url: nodeUrl.URL): Promise<[http.IncomingMessage, string]> {
-  const msg = await getStream(url);
-  let text = '';
-  msg.on('data', (chunk: string) => { text += chunk; });
-  await stream.finished(msg);
-  return [msg, text];
-}
 
 interface Observation {
   AQSID: string;
@@ -64,7 +82,8 @@ function toUtc(date: Date): Date {
 }
 
 // get observations from a specific date & time
-export async function getObservations(date: Date): Promise<[http.IncomingMessage, Observation[]]> {
+export async function getObservations(date: Date): Promise<Result<Observation[], Failure>> {
+  // construct appropriate URL
   const d = toUtc(date);
   const z = (x: number) => String(x).padStart(2, '0');
   const yyyy = String(d.getFullYear());
@@ -73,9 +92,10 @@ export async function getObservations(date: Date): Promise<[http.IncomingMessage
   const HH = z(d.getHours());
   const dateStr = `${yyyy}${mm}${dd}`;
   const url = new nodeUrl.URL(
-    `https://s3-us-west-1.amazonaws.com//files.airnowtech.org/airnow/${yyyy}/${dateStr}/HourlyAQObs_${dateStr}${HH}.dat`,
+    `https://s3-us-west-.amazonaws.com//files.airnowtech.org/airnow/${yyyy}/${dateStr}/HourlyAQObs_${dateStr}${HH}.dat`,
   );
 
+  // build CSV parsing pipeline
   const csv = parse({
     delimiter: ',',
   });
@@ -86,19 +106,22 @@ export async function getObservations(date: Date): Promise<[http.IncomingMessage
     }
   });
   const msg = await getStream(url);
-  msg.pipe(csv);
+  if (msg.type === ResultType.Fail) {
+    return msg;
+  }
+  msg.value.pipe(csv);
   try {
     await stream.finished(csv);
   } catch (err) {
-    // this probably means a parse error, which probably means a 404
-    // console.error(err);
-    return [msg, []];
+    console.log(err);
+    return Fail(Failure.ParsePipeline);
   }
 
+  // map each parsed record to Observation
   const keys: Record<string, number> = {};
   (records[0]||[]).forEach((k, i) => keys[k] = i);
   const k = (r: string[], key: string) => r[keys[key] || r.length] || '';
-  return [msg, records.slice(1).map((r) => ({
+  return Ok(records.slice(1).map((r) => ({
     AQSID: k(r, 'AQSID'),
     SiteName: k(r, 'SiteName'),
     Status: k(r, 'Status'),
@@ -133,23 +156,27 @@ export async function getObservations(date: Date): Promise<[http.IncomingMessage
     SO2_Unit: k(r, 'SO2_Unit'),
     PM10: k(r, 'PM10'),
     PM10_Unit: k(r, 'PM10_Unit'),
-  }))];
+  })));
 }
 
 // get the most recent observations
-async function recursiveGetCurrent(depth: number, maxDepth: number): Promise<[http.IncomingMessage, Observation[]]> {
+async function recursiveGetCurrent(depth: number, maxDepth: number): Promise<Result<Observation[], Failure>> {
   const d = new Date();
-  console.log(`pass ${depth}`);
   d.setHours(d.getHours() - depth);
-  const [msg, obs] = await getObservations(d);
-  if (msg.statusCode === 200) {
+  console.log(`pass ${depth}, ${d}`);
+  const result = await getObservations(d);
+  if (result.type === ResultType.Ok) {
     // everything is fine c:
-    return [msg, obs]
+    return result;
+  } else if (depth > maxDepth) {
+    // failure, but depth has been exceeded :c
+    return result;
   } else {
+    // go one level deeper!
     return await recursiveGetCurrent(depth+1, maxDepth);
   }
 }
-export async function getCurrentObservations(): Promise<[http.IncomingMessage, Observation[]]> {
+export async function getCurrentObservations(): Promise<Result<Observation[], Failure>> {
   return await recursiveGetCurrent(0, 10);
 }
 
