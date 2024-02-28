@@ -4,6 +4,7 @@ import * as https from 'node:https';
 import * as stream from 'node:stream/promises';
 import { parse } from 'csv-parse';
 
+// helper function for asynchronous HTTPS GET
 export function getStream(url: nodeUrl.URL): Promise<http.IncomingMessage> {
   return new Promise((resolve) => {
     https.get(url, resolve);
@@ -55,12 +56,14 @@ interface Observation {
   PM10_Unit : string;
 }
 
+// shift a date's time offset to be UTC
 function toUtc(date: Date): Date {
   const utcDate = new Date(date);
-  utcDate.setMinutes(utcDate.getMinutes() - date.getTimezoneOffset());
+  utcDate.setMinutes(utcDate.getMinutes() + date.getTimezoneOffset());
   return utcDate;
 }
 
+// get observations from a specific date & time
 export async function getObservations(date: Date): Promise<Observation[]> {
   const d = toUtc(date);
   const z = (x: number) => String(x).padStart(2, '0');
@@ -85,47 +88,65 @@ export async function getObservations(date: Date): Promise<Observation[]> {
   const msg = await getStream(url);
   msg.pipe(csv);
   await stream.finished(csv);
-  return records.map((r) => ({
-    AQSID: r[0] || '',
-    SiteName: r[1] || '',
-    Status: r[2] || '',
-    EPARegion: r[3] || '',
-    Latitude: r[4] || '',
-    Longitude: r[5] || '',
-    Elevation: r[6] || '',
-    GMTOffset: r[7] || '',
-    CountryCode: r[8] || '',
-    StateName: r[9] || '',
-    ValidDate: r[10] || '',
-    ValidTime: r[11] || '',
-    DataSource: r[12] || '',
-    ReportingArea_PipeDelimited: r[13] || '',
-    OZONE_AQI: r[14] || '',
-    PM10_AQI: r[15] || '',
-    PM25_AQI: r[16] || '',
-    NO2_AQI: r[17] || '',
-    OZONE_Measured: r[18] || '',
-    PM10_Measured: r[19] || '',
-    PM25_Measured: r[20] || '',
-    NO2_Measured: r[21] || '',
-    PM25: r[22] || '',
-    PM25_Unit: r[23] || '',
-    OZONE: r[24] || '',
-    OZONE_Unit: r[25] || '',
-    NO2: r[26] || '',
-    NO2_Unit: r[27] || '',
-    CO: r[28] || '',
-    CO_Unit: r[29] || '',
-    SO2: r[30] || '',
-    SO2_Unit: r[31] || '',
-    PM10: r[32] || '',
-    PM10_Unit: r[33] || '',
+  const keys: Record<string, number> = {};
+  (records[0]||[]).forEach((k, i) => keys[k] = i);
+  const k = (r: string[], key: string) => r[keys[key] || r.length] || '';
+  console.log(keys);
+  return records.slice(1).map((r) => ({
+    AQSID: k(r, 'AQSID'),
+    SiteName: k(r, 'SiteName'),
+    Status: k(r, 'Status'),
+    EPARegion: k(r, 'EPARegion'),
+    Latitude: k(r, 'Latitude'),
+    Longitude: k(r, 'Longitude'),
+    Elevation: k(r, 'Elevation'),
+    GMTOffset: k(r, 'GMTOffset'),
+    CountryCode: k(r, 'CountryCode'),
+    StateName: k(r, 'StateName'),
+    ValidDate: k(r, 'ValidDate'),
+    ValidTime: k(r, 'ValidTime'),
+    DataSource: k(r, 'DataSource'),
+    ReportingArea_PipeDelimited: k(r, 'ReportingArea_PipeDelimited'),
+    OZONE_AQI: k(r, 'OZONE_AQI'),
+    PM10_AQI: k(r, 'PM10_AQI'),
+    PM25_AQI: k(r, 'PM25_AQI'),
+    NO2_AQI: k(r, 'NO2_AQI'),
+    OZONE_Measured: k(r, 'OZONE_Measured'),
+    PM10_Measured: k(r, 'PM10_Measured'),
+    PM25_Measured: k(r, 'PM25_Measured'),
+    NO2_Measured: k(r, 'NO2_Measured'),
+    PM25: k(r, 'PM25'),
+    PM25_Unit: k(r, 'PM25_Unit'),
+    OZONE: k(r, 'OZONE'),
+    OZONE_Unit: k(r, 'OZONE_Unit'),
+    NO2: k(r, 'NO2'),
+    NO2_Unit: k(r, 'NO2_Unit'),
+    CO: k(r, 'CO'),
+    CO_Unit: k(r, 'CO_Unit'),
+    SO2: k(r, 'SO2'),
+    SO2_Unit: k(r, 'SO2_Unit'),
+    PM10: k(r, 'PM10'),
+    PM10_Unit: k(r, 'PM10_Unit'),
   }));
 }
 
+// get the most recent observations
+export async function getCurrentObservations(): Promise<Observation[]> {
+	const d = new Date(); // current time
+	try {
+	  return await getObservations(d);
+	} catch(_: any) {
+	  d.setHours(d.getHours() - 1);
+	  return await getObservations(d);
+	}
+}
+
+// convert degrees to radians
 function toRadians(degrees: number): number {
   return Math.PI * (degrees / 180);
 }
+
+// compute the great-circle distance between two lat/long points on a sphere
 function greatCircleDist(
   radius: number,
   lat1: number,
@@ -144,6 +165,8 @@ function greatCircleDist(
 }
 
 const EARTH_RADIUS = 6378.137; // kilometers
+
+// create a filter function so that only observations within range pass the test
 export function distanceFilter(latitude: number, longitude: number, maxDistance: number): (o: Observation) => boolean {
   return (o: Observation) => {
 		const distance = greatCircleDist(EARTH_RADIUS, Number(o.Latitude), Number(o.Longitude), latitude, longitude);
