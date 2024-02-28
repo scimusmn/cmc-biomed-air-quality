@@ -2,7 +2,7 @@ import * as nodeUrl from 'node:url';
 import * as http from 'node:http';
 import * as https from 'node:https';
 import * as stream from 'node:stream/promises';
-import { parse } from 'csv-parse';
+import { CsvError, parse } from 'csv-parse';
 
 export enum ResultType {
   Ok = 'resulttype-ok',
@@ -24,8 +24,10 @@ const Fail = <T> (value: T): Fail<T> => ({ type: ResultType.Fail, value });
 type Result<L, R> = Ok<L> | Fail<R>
 
 enum Failure {
-  HttpsRequest,
-  ParsePipeline,
+  HttpsRequest = 'Failure-Https-Request',
+  HttpsResponse = 'Failure-Https-Response',
+  ParsePipeline = 'Failure-Parse-Pipeline',
+  Unknown = 'Failure-Unknown',
 }
 
 // helper function for asynchronous HTTPS GET
@@ -92,7 +94,7 @@ export async function getObservations(date: Date): Promise<Result<Observation[],
   const HH = z(d.getHours());
   const dateStr = `${yyyy}${mm}${dd}`;
   const url = new nodeUrl.URL(
-    `https://s3-us-west-.amazonaws.com//files.airnowtech.org/airnow/${yyyy}/${dateStr}/HourlyAQObs_${dateStr}${HH}.dat`,
+    `https://s3-us-west-1.amazonaws.com//files.airnowtech.org/airnow/${yyyy}/${dateStr}/HourlyAQObs_${dateStr}${HH}.dat`,
   );
 
   // build CSV parsing pipeline
@@ -113,8 +115,13 @@ export async function getObservations(date: Date): Promise<Result<Observation[],
   try {
     await stream.finished(csv);
   } catch (err) {
-    console.log(err);
-    return Fail(Failure.ParsePipeline);
+    if (msg.value.statusCode !== 200) {
+      return Fail(Failure.HttpsResponse);
+    } else if (err instanceof CsvError) {
+      return Fail(Failure.ParsePipeline);
+    } else {
+      return Fail(Failure.Unknown);
+    }
   }
 
   // map each parsed record to Observation
@@ -173,6 +180,7 @@ async function recursiveGetCurrent(depth: number, maxDepth: number): Promise<Res
     return result;
   } else {
     // go one level deeper!
+    console.log(result.value);
     return await recursiveGetCurrent(depth+1, maxDepth);
   }
 }
