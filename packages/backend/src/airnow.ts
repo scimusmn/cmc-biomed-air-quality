@@ -39,7 +39,7 @@ export function getStream(url: nodeUrl.URL): Promise<Result<http.IncomingMessage
 }
 
 
-interface Observation {
+export interface Observation {
   AQSID: string;
   SiteName: string;
   Status: string;
@@ -76,6 +76,44 @@ interface Observation {
   PM10_Unit : string;
 }
 
+export function isObservation(o: any): o is Observation {
+  if (typeof o.AQSID !== 'string') { return false; }
+  if (typeof o.SiteName !== 'string') { return false; }
+  if (typeof o.Status !== 'string') { return false; }
+  if (typeof o.EPARegion !== 'string') { return false; }
+  if (typeof o.Latitude !== 'string') { return false; }
+  if (typeof o.Longitude !== 'string') { return false; }
+  if (typeof o.Elevation !== 'string') { return false; }
+  if (typeof o.GMTOffset !== 'string') { return false; }
+  if (typeof o.CountryCode !== 'string') { return false; }
+  if (typeof o.StateName !== 'string') { return false; }
+  if (typeof o.ValidDate !== 'string') { return false; }
+  if (typeof o.ValidTime !== 'string') { return false; }
+  if (typeof o.DataSource !== 'string') { return false; }
+  if (typeof o.ReportingArea_PipeDelimited !== 'string') { return false; }
+  if (typeof o.OZONE_AQI !== 'string') { return false; }
+  if (typeof o.PM10_AQI !== 'string') { return false; }
+  if (typeof o.PM25_AQI !== 'string') { return false; }
+  if (typeof o.NO2_AQI !== 'string') { return false; }
+  if (typeof o.OZONE_Measured !== 'string') { return false; }
+  if (typeof o.PM10_Measured !== 'string') { return false; }
+  if (typeof o.PM25_Measured !== 'string') { return false; }
+  if (typeof o.NO2_Measured !== 'string') { return false; }
+  if (typeof o.PM25 !== 'string') { return false; }
+  if (typeof o.PM25_Unit !== 'string') { return false; }
+  if (typeof o.OZONE !== 'string') { return false; }
+  if (typeof o.OZONE_Unit !== 'string') { return false; }
+  if (typeof o.NO2 !== 'string') { return false; }
+  if (typeof o.NO2_Unit !== 'string') { return false; }
+  if (typeof o.CO !== 'string') { return false; }
+  if (typeof o.CO_Unit !== 'string') { return false; }
+  if (typeof o.SO2 !== 'string') { return false; }
+  if (typeof o.SO2_Unit !== 'string') { return false; }
+  if (typeof o.PM10 !== 'string') { return false; }
+  if (typeof o.PM10_Unit  !== 'string') { return false; }
+  return true;
+}
+
 // shift a date's time offset to be UTC
 function toUtc(date: Date): Date {
   const utcDate = new Date(date);
@@ -84,7 +122,7 @@ function toUtc(date: Date): Date {
 }
 
 // get observations from a specific date & time
-export async function getObservations(date: Date): Promise<Result<Observation[], Failure>> {
+export async function getObservations(aws: string, date: Date): Promise<Result<Observation[], Failure>> {
   // construct appropriate URL
   const d = toUtc(date);
   const z = (x: number) => String(x).padStart(2, '0');
@@ -94,8 +132,9 @@ export async function getObservations(date: Date): Promise<Result<Observation[],
   const HH = z(d.getHours());
   const dateStr = `${yyyy}${mm}${dd}`;
   const url = new nodeUrl.URL(
-    `https://s3-us-west-1.amazonaws.com//files.airnowtech.org/airnow/${yyyy}/${dateStr}/HourlyAQObs_${dateStr}${HH}.dat`,
+    `${aws}${yyyy}/${dateStr}/HourlyAQObs_${dateStr}${HH}.dat`,
   );
+  console.log(url);
 
   // build CSV parsing pipeline
   const csv = parse({
@@ -128,64 +167,18 @@ export async function getObservations(date: Date): Promise<Result<Observation[],
   const keys: Record<string, number> = {};
   (records[0]||[]).forEach((k, i) => keys[k] = i);
   const k = (r: string[], key: string) => r[keys[key] || r.length] || '';
-  return Ok(records.slice(1).map((r) => ({
-    AQSID: k(r, 'AQSID'),
-    SiteName: k(r, 'SiteName'),
-    Status: k(r, 'Status'),
-    EPARegion: k(r, 'EPARegion'),
-    Latitude: k(r, 'Latitude'),
-    Longitude: k(r, 'Longitude'),
-    Elevation: k(r, 'Elevation'),
-    GMTOffset: k(r, 'GMTOffset'),
-    CountryCode: k(r, 'CountryCode'),
-    StateName: k(r, 'StateName'),
-    ValidDate: k(r, 'ValidDate'),
-    ValidTime: k(r, 'ValidTime'),
-    DataSource: k(r, 'DataSource'),
-    ReportingArea_PipeDelimited: k(r, 'ReportingArea_PipeDelimited'),
-    OZONE_AQI: k(r, 'OZONE_AQI'),
-    PM10_AQI: k(r, 'PM10_AQI'),
-    PM25_AQI: k(r, 'PM25_AQI'),
-    NO2_AQI: k(r, 'NO2_AQI'),
-    OZONE_Measured: k(r, 'OZONE_Measured'),
-    PM10_Measured: k(r, 'PM10_Measured'),
-    PM25_Measured: k(r, 'PM25_Measured'),
-    NO2_Measured: k(r, 'NO2_Measured'),
-    PM25: k(r, 'PM25'),
-    PM25_Unit: k(r, 'PM25_Unit'),
-    OZONE: k(r, 'OZONE'),
-    OZONE_Unit: k(r, 'OZONE_Unit'),
-    NO2: k(r, 'NO2'),
-    NO2_Unit: k(r, 'NO2_Unit'),
-    CO: k(r, 'CO'),
-    CO_Unit: k(r, 'CO_Unit'),
-    SO2: k(r, 'SO2'),
-    SO2_Unit: k(r, 'SO2_Unit'),
-    PM10: k(r, 'PM10'),
-    PM10_Unit: k(r, 'PM10_Unit'),
-  })));
-}
-
-// get the most recent observations
-async function recursiveGetCurrent(depth: number, maxDepth: number): Promise<Result<Observation[], Failure>> {
-  const d = new Date();
-  d.setHours(d.getHours() - depth);
-  console.log(`pass ${depth}, ${d}`);
-  const result = await getObservations(d);
-  if (result.type === ResultType.Ok) {
-    // everything is fine c:
-    return result;
-  } else if (depth > maxDepth) {
-    // failure, but depth has been exceeded :c
-    return result;
-  } else {
-    // go one level deeper!
-    console.log(result.value);
-    return await recursiveGetCurrent(depth+1, maxDepth);
-  }
-}
-export async function getCurrentObservations(): Promise<Result<Observation[], Failure>> {
-  return await recursiveGetCurrent(0, 10);
+  const observations: Observation[] = records.slice(1).map((r) => {
+    const o: any = {};
+    for (let key of Object.keys(keys)) {
+      o[key] = k(r, key);
+    }
+    if (isObservation(o)) {
+      return o;
+    } else {
+      throw new Error(`invalid record: ${r}`);
+    }
+  });
+  return Ok(observations);
 }
 
 // convert degrees to radians
