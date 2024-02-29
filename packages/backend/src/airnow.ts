@@ -134,7 +134,6 @@ export async function getObservations(aws: string, date: Date): Promise<Result<O
   const url = new nodeUrl.URL(
     `${aws}${yyyy}/${dateStr}/HourlyAQObs_${dateStr}${HH}.dat`,
   );
-  console.log(url);
 
   // build CSV parsing pipeline
   const csv = parse({

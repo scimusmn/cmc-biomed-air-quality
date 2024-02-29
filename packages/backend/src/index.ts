@@ -1,22 +1,32 @@
 import 'dotenv/config';
-import { ResultType, getObservations, distanceFilter } from './airnow.js';
+import { synchronize } from './db.js';
 
-// cincinnati latitude & longitude
-const CINCI_LAT = 39.1;
-const CINCI_LONG = -84.5125;
+const e = process.env;
 
-if (typeof process.env.AWS_PREFIX !== 'string') {
-  console.error('.env: AWS_PREFIX is not set! Please set it appropriately and try again');
+function envError(key: string) {
+  throw new Error(`.env: please ensure ${key} is present in your environment`);
 }
 
-console.log(process.env.AWS_PREFIX);
 
-(async () => {
-  const result = await getObservations(process.env.AWS_PREFIX as string, new Date('2024-02-01'));
-  if (result.type === ResultType.Ok) {
-    console.log(result.value.filter(distanceFilter(CINCI_LAT, CINCI_LONG, 20)));
-  } else {
-    console.log('something seems to be wrong!', result.value);
-  }
-})()
-  .then(() => {})
+if (typeof e.AWS_PREFIX !== 'string') {
+  envError('AWS_PREFIX');
+} else if (typeof e.DB_FILE !== 'string') {
+  envError('DB_FILE');
+} else if (typeof e.LATITUDE !== 'string') {
+  envError('LATITUDE');
+} else if (typeof e.LONGITUDE !== 'string') {
+  envError('LONGITUDE');
+} else if (typeof e.RANGE !== 'string') {
+  envError('RANGE');
+} else if (typeof e.REFRESH_HOURS !== 'string') {
+  envError('REFRESH_HOURS');
+} else {
+  synchronize(
+    e.AWS_PREFIX, 
+    e.DB_FILE,
+    Number(e.LATITUDE),
+    Number(e.LONGITUDE),
+    Number(e.RANGE),
+    Number(e.REFRESH_HOURS),
+  ).then(() => console.log('done!'));
+}
