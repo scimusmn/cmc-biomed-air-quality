@@ -26,6 +26,7 @@
   "scripts": {
     "build": "yarn run tsc",
     "start": "yarn build && node lib/index.js",
+    "start:compiled": "node lib/index.js",
     "lint": "yarn run eslint . --ext .ts",
     "lint:fix": "eslint . --fix --ext .ts"
   },
