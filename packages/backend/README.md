@@ -37,3 +37,10 @@ You can then run the compiled code with
 ```
 yarn start:compiled
 ```
+
+
+## files
+
+ * `src/airnow.ts`: exports various types functions for downloading and manipulating AirNow data.
+ * `src/db.ts`: exports a single function, `synchronize`, that updates the database file.
+ * `src/index.ts`: validates `.env` parameters and calls `synchronize` from `db.ts`.
