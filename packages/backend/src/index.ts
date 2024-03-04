@@ -1,12 +1,11 @@
 import 'dotenv/config';
-import { synchronize } from './db.js';
+import synchronize from './db.js';
 
 const e = process.env;
 
 function envError(key: string) {
   throw new Error(`.env: please ensure ${key} is present in your environment`);
 }
-
 
 if (typeof e.AWS_PREFIX !== 'string') {
   envError('AWS_PREFIX');
@@ -22,7 +21,7 @@ if (typeof e.AWS_PREFIX !== 'string') {
   envError('REFRESH_HOURS');
 } else {
   synchronize(
-    e.AWS_PREFIX, 
+    e.AWS_PREFIX,
     e.DB_FILE,
     Number(e.LATITUDE),
     Number(e.LONGITUDE),

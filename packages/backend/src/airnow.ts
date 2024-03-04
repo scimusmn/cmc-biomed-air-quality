@@ -13,17 +13,19 @@ export interface Ok<T> {
   type: typeof ResultType.Ok;
   value: T;
 }
-const Ok = <T> (value: T): Ok<T> => ({ type: ResultType.Ok, value });
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const Ok = <T> (value: T): Ok<T> => ({ type: ResultType.Ok, value });
 
-interface Fail<T> {
+export interface Fail<T> {
   type: typeof ResultType.Fail;
   value: T;
 }
-const Fail = <T> (value: T): Fail<T> => ({ type: ResultType.Fail, value });
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const Fail = <T> (value: T): Fail<T> => ({ type: ResultType.Fail, value });
 
-type Result<L, R> = Ok<L> | Fail<R>
+export type Result<L, R> = Ok<L> | Fail<R>;
 
-enum Failure {
+export enum Failure {
   HttpsRequest = 'Failure-Https-Request',
   HttpsResponse = 'Failure-Https-Response',
   ParsePipeline = 'Failure-Parse-Pipeline',
@@ -37,7 +39,6 @@ export function getStream(url: nodeUrl.URL): Promise<Result<http.IncomingMessage
     req.on('error', () => resolve(Fail(Failure.HttpsRequest)));
   });
 }
-
 
 export interface Observation {
   AQSID: string;
@@ -110,7 +111,7 @@ export function isObservation(o: any): o is Observation {
   if (typeof o.SO2 !== 'string') { return false; }
   if (typeof o.SO2_Unit !== 'string') { return false; }
   if (typeof o.PM10 !== 'string') { return false; }
-  if (typeof o.PM10_Unit  !== 'string') { return false; }
+  if (typeof o.PM10_Unit !== 'string') { return false; }
   return true;
 }
 
@@ -122,7 +123,10 @@ function toUtc(date: Date): Date {
 }
 
 // get observations from a specific date & time
-export async function getObservations(aws: string, date: Date): Promise<Result<Observation[], Failure>> {
+export async function getObservations(
+  aws: string,
+  date: Date,
+): Promise<Result<Observation[], Failure>> {
   // construct appropriate URL
   const d = toUtc(date);
   const z = (x: number) => String(x).padStart(2, '0');
@@ -155,27 +159,25 @@ export async function getObservations(aws: string, date: Date): Promise<Result<O
   } catch (err) {
     if (msg.value.statusCode !== 200) {
       return Fail(Failure.HttpsResponse);
-    } else if (err instanceof CsvError) {
+    } if (err instanceof CsvError) {
       return Fail(Failure.ParsePipeline);
-    } else {
-      return Fail(Failure.Unknown);
     }
+    return Fail(Failure.Unknown);
   }
 
   // map each parsed record to Observation
   const keys: Record<string, number> = {};
-  (records[0]||[]).forEach((k, i) => keys[k] = i);
+  (records[0] || []).forEach((k, i) => { keys[k] = i; });
   const k = (r: string[], key: string) => r[keys[key] || r.length] || '';
   const observations: Observation[] = records.slice(1).map((r) => {
     const o: any = {};
-    for (let key of Object.keys(keys)) {
+    Object.keys(keys).forEach((key) => {
       o[key] = k(r, key);
-    }
+    });
     if (isObservation(o)) {
       return o;
-    } else {
-      throw new Error(`invalid record: ${r}`);
     }
+    throw new Error(`invalid record: ${r}`);
   });
   return Ok(observations);
 }
@@ -206,9 +208,19 @@ function greatCircleDist(
 const EARTH_RADIUS = 6378.137; // kilometers
 
 // create a filter function so that only observations within range pass the test
-export function distanceFilter(latitude: number, longitude: number, maxDistance: number): (o: Observation) => boolean {
+export function distanceFilter(
+  latitude: number,
+  longitude: number,
+  maxDistance: number,
+): (o: Observation) => boolean {
   return (o: Observation) => {
-		const distance = greatCircleDist(EARTH_RADIUS, Number(o.Latitude), Number(o.Longitude), latitude, longitude);
-		return distance <= maxDistance;
-	};
+    const distance = greatCircleDist(
+      EARTH_RADIUS,
+      Number(o.Latitude),
+      Number(o.Longitude),
+      latitude,
+      longitude,
+    );
+    return distance <= maxDistance;
+  };
 }
