@@ -4,11 +4,17 @@ import * as https from 'node:https';
 import * as stream from 'node:stream/promises';
 import { CsvError, parse } from 'csv-parse';
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// functional-programming style Result type, used instead of normal errors
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// used to disambiguate Ok vs Fail
 export enum ResultType {
   Ok = 'resulttype-ok',
   Fail = 'resulttype-fail',
 }
 
+// Ok (success) type
 export interface Ok<T> {
   type: typeof ResultType.Ok;
   value: T;
@@ -16,6 +22,7 @@ export interface Ok<T> {
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const Ok = <T> (value: T): Ok<T> => ({ type: ResultType.Ok, value });
 
+// Fail (error) type
 export interface Fail<T> {
   type: typeof ResultType.Fail;
   value: T;
@@ -23,8 +30,14 @@ export interface Fail<T> {
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const Fail = <T> (value: T): Fail<T> => ({ type: ResultType.Fail, value });
 
+// success or failure type
 export type Result<L, R> = Ok<L> | Fail<R>;
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// HTTPS promise helpers
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// Failure enum to record the various ways we can fail
 export enum Failure {
   HttpsRequest = 'Failure-Https-Request',
   HttpsResponse = 'Failure-Https-Response',
@@ -39,6 +52,10 @@ export function getStream(url: nodeUrl.URL): Promise<Result<http.IncomingMessage
     req.on('error', () => resolve(Fail(Failure.HttpsRequest)));
   });
 }
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// airnow Observations
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 export interface Observation {
   AQSID: string;
@@ -77,6 +94,7 @@ export interface Observation {
   PM10_Unit : string;
 }
 
+// Observation type guard
 export function isObservation(o: any): o is Observation {
   if (typeof o.AQSID !== 'string') { return false; }
   if (typeof o.SiteName !== 'string') { return false; }
@@ -145,10 +163,13 @@ export async function getObservations(
   });
   const records: string[][] = [];
   csv.on('readable', () => {
+    // consume records as long as they are available
     for (let r = csv.read(); r !== null; r = csv.read()) {
       records.push(r);
     }
   });
+
+  // perform the actual GET and pipe thru CSV parser
   const msg = await getStream(url);
   if (msg.type === ResultType.Fail) {
     return msg;
@@ -157,6 +178,7 @@ export async function getObservations(
   try {
     await stream.finished(csv);
   } catch (err) {
+    // nicer Result error handling c:
     if (msg.value.statusCode !== 200) {
       return Fail(Failure.HttpsResponse);
     } if (err instanceof CsvError) {
@@ -179,8 +201,14 @@ export async function getObservations(
     }
     throw new Error(`invalid record: ${r}`);
   });
+
+  // done
   return Ok(observations);
 }
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// spherical-metric distance calculations
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // convert degrees to radians
 function toRadians(degrees: number): number {

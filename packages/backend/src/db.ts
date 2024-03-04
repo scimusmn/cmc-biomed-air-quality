@@ -11,6 +11,11 @@ import {
   distanceFilter,
 } from './airnow.js';
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// db stuff
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// a db entry, consisting of observations for a particular lat/long/range and time
 interface DbEntry {
   latitude: number;
   longitude: number;
@@ -19,10 +24,12 @@ interface DbEntry {
   observations: Observation[];
 }
 
+// type guard helper for arrays
 function isArrayType<T>(o: any[], isT: (o1: any) => o1 is T): o is T[] {
   return o.reduce((acc, x) => acc && isT(x), true);
 }
 
+// db entry type guard
 function isDbEntry(o: any): o is DbEntry {
   if (typeof o.latitude !== 'number') { return false; }
   if (typeof o.longitude !== 'number') { return false; }
@@ -32,11 +39,13 @@ function isDbEntry(o: any): o is DbEntry {
   return true;
 }
 
+// read the database from disk
 async function readDb(dbFilename: string): Promise<DbEntry[]> {
   const data = await fs.readFile(dbFilename);
   const o = JSON.parse(data.toString(), (k, v) => {
     if (k === 'date') {
       const d = new Date(v);
+      // we only care about YYYY-MM-DD:HH, so set the rest to 0
       d.setMinutes(0);
       d.setSeconds(0);
       d.setMilliseconds(0);
@@ -94,7 +103,7 @@ function getMissingDates(db: DbEntry[]): Date[] {
   return allDates.filter((d) => !dbDates.has(d.toISOString()));
 }
 
-// get the observations associated with a particular date
+// HTTPS GET a db entry for the observations associated with a particular date
 async function getDbEntry(
   awsPrefix: string,
   date: Date,
@@ -120,6 +129,8 @@ async function getDbEntry(
   });
 }
 
+// recursive helper to re-try failed HTTPS GET requests N times
+// returns Ok if any retry succeeds; otherwise returns Fail
 async function recursiveGetDbEntry(
   awsPrefix: string,
   date: Date,
@@ -148,6 +159,7 @@ async function recursiveGetDbEntry(
   return result;
 }
 
+// synchronize the existing db file with the AirNow file service
 export default async function synchronize(
   awsPrefix: string,
   dbFilename: string,
@@ -166,6 +178,7 @@ export default async function synchronize(
   const limiter = new Bottleneck({ maxConcurrent: 20 });
   const MAX_RETRIES = 3;
 
+  // helper to wrap limiter-managed requests
   const fetchResults = (dates: Date[]) => Promise.all(dates.map(
     (date) => limiter.schedule(
       () => recursiveGetDbEntry(
@@ -179,6 +192,7 @@ export default async function synchronize(
     ),
   ));
 
+  // perform our GET requests
   const [staleResults, missingResults] = await Promise.all([
     fetchResults(staleDates),
     fetchResults(missingDates),
