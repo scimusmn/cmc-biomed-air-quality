@@ -204,7 +204,7 @@ export default async function synchronize(
   const requestFailure = failures
     .reduce((acc, r) => acc || r.value === Failure.HttpsRequest, false);
   if (requestFailure) {
-    console.error('possible API outage or internet connection issue detected!');
+    throw new Error('possible API outage or internet connection issue detected!');
   }
 
   // update stale values
