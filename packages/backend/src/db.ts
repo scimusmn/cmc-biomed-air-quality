@@ -237,6 +237,11 @@ export default async function synchronize(
     return 1;
   });
 
+  // remove old values
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - 365);
+  const finalDb = newNewDb.filter((entry) => entry.date >= cutoffDate);
+
   // write to disk
-  await fs.writeFile(dbFilename, JSON.stringify(newNewDb));
+  await fs.writeFile(dbFilename, JSON.stringify(finalDb));
 }
