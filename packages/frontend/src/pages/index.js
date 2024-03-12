@@ -1,14 +1,20 @@
 import React from 'react';
-import { Link } from 'gatsby';
-
-import Home from '@components/Home';
+import Map from '@components/Map';
 
 function IndexPage() {
+  const [mapShapes, setMapShapes] = React.useState([]);
+
+  React.useEffect(() => {
+    fetch('/gis/ne_10m_roads_north_america.geojson')
+      .then((response) => response.json())
+      .then((json) => {
+        console.log(json);
+        setMapShapes(json.features);
+      });
+  }, []);
+
   return (
-    <>
-      <Home />
-      <Link to="/second-page">Test?</Link>
-    </>
+    <Map mapShapes={mapShapes} />
   );
 }
 
