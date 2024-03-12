@@ -65,6 +65,12 @@ Technical description of this code.
 * Describe the technical systems or languages that this code uses.
 * Provide a brief overview of how the technical system works.
 
+### Map Notes
+
+The map data in this project comes from [Natural Earth](naturalearthdata.com). This data comes in Esri shapefile format,
+and was converted to GeoJSON using [ogr2ogr](https://gdal.org/programs/ogr2ogr.html). `ogr2ogr` was also used to clip
+the massive resulting data files to a region stretching from (36, -88) in the southwest to (44, -77) in the northeast.
+
 ## Install (required)
 Basic install instructions. This might describe the script's file path.
 

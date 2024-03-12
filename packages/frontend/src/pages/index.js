@@ -1,15 +1,24 @@
 import React from 'react';
 import Map from '@components/Map';
 
+function loadGeo(url) {
+  return fetch(url).then((response) => response.json());
+}
+
+const geoDataSources = [
+  '/gis/roads.geojson',
+  '/gis/places.geojson',
+];
+
 function IndexPage() {
   const [mapShapes, setMapShapes] = React.useState([]);
 
   React.useEffect(() => {
-    fetch('/gis/ne_10m_roads_north_america.geojson')
-      .then((response) => response.json())
-      .then((json) => {
-        console.log(json);
-        setMapShapes(json.features);
+    Promise.all(geoDataSources.map((url) => loadGeo(url)))
+      .then((data) => {
+        const shapes = data.map((x) => x.features);
+        console.log(shapes);
+        setMapShapes(shapes.flat());
       });
   }, []);
 
