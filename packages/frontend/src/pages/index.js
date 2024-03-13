@@ -32,8 +32,6 @@ function IndexPage() {
       });
   }, []);
 
-  console.log('this is mapShapes:', mapShapes);
-
   return (
     <Map mapShapes={mapShapes} />
   );
