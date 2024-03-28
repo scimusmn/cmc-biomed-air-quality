@@ -3,6 +3,7 @@ import Bottleneck from 'bottleneck';
 import {
   Result,
   Ok,
+  Fail,
   Failure,
   ResultType,
   Observation,
@@ -39,8 +40,21 @@ function isDbEntry(o: any): o is DbEntry {
   return true;
 }
 
+// check if a file exists
+export async function fileExists(filename: string): Promise<Result<boolean, Error>> {
+  return fs.stat(filename)
+    .then(() => Ok(true))
+    .catch((err) => {
+      if (err.code === 'ENOENT') { 
+        return Ok(false); 
+      } else {
+        return Fail(err);
+      }
+    });
+}
+
 // read the database from disk
-async function readDb(dbFilename: string): Promise<DbEntry[]> {
+export async function readDb(dbFilename: string): Promise<DbEntry[]> {
   const data = await fs.readFile(dbFilename);
   const o = JSON.parse(data.toString(), (k, v) => {
     if (k === 'date') {
@@ -168,6 +182,18 @@ export default async function synchronize(
   range: number,
   refreshHours: number,
 ) {
+  // check if db file exists
+  const existResult = await fileExists(dbFilename);
+  if (existResult.type === ResultType.Fail) {
+    console.log(existResult.value);
+  }
+
+  const exists = existResult.value as boolean;
+  if (!exists) {
+    console.log('db file does not exist!!');
+    return;
+  }
+
   const db = await readDb(dbFilename);
 
   // determine which dates need updating (staleDates) and which need to be inserted (missingDates)
