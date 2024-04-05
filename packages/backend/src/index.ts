@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import synchronize from './db.js';
+import { createOverlay, drawMap } from './map.js';
 
 const e = process.env;
 
@@ -20,12 +20,15 @@ if (typeof e.AWS_PREFIX !== 'string') {
 } else if (typeof e.REFRESH_HOURS !== 'string') {
   envError('REFRESH_HOURS');
 } else {
-  synchronize(
-    e.AWS_PREFIX,
-    e.DB_FOLDER,
-    Number(e.LATITUDE),
-    Number(e.LONGITUDE),
-    Number(e.RANGE),
-    Number(e.REFRESH_HOURS),
-  ).then(() => console.log('done!'));
+  const main = async () => {
+    const overlay = await createOverlay(
+      './gis/roads.geojson',
+      './gis/places.geojson',
+      [Number(e.LATITUDE), Number(e.LONGITUDE)],
+      1920,
+      1080,
+    );
+    await drawMap('map.png', [], overlay, 1920, 1080);
+  };
+  main().then(() => console.log('done!'));
 }
