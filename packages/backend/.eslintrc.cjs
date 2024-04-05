@@ -19,6 +19,9 @@ module.exports = {
       parserOptions: {
         sourceType: 'script',
       },
+      rules: {
+        "no-multiple-empty-lines": 'off',
+      },
     },
   ],
   parserOptions: {
@@ -30,5 +33,6 @@ module.exports = {
       varsIgnorePattern: '^_',
       argsIgnorePattern: '^_',
     }],
+    "no-multiple-empty-lines": 'off',
   },
 };
