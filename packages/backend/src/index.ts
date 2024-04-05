@@ -9,8 +9,8 @@ function envError(key: string) {
 
 if (typeof e.AWS_PREFIX !== 'string') {
   envError('AWS_PREFIX');
-} else if (typeof e.DB_FILE !== 'string') {
-  envError('DB_FILE');
+} else if (typeof e.DB_FOLDER !== 'string') {
+  envError('DB_FOLDER');
 } else if (typeof e.LATITUDE !== 'string') {
   envError('LATITUDE');
 } else if (typeof e.LONGITUDE !== 'string') {
@@ -22,7 +22,7 @@ if (typeof e.AWS_PREFIX !== 'string') {
 } else {
   synchronize(
     e.AWS_PREFIX,
-    e.DB_FILE,
+    e.DB_FOLDER,
     Number(e.LATITUDE),
     Number(e.LONGITUDE),
     Number(e.RANGE),

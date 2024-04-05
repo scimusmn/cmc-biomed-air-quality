@@ -3,35 +3,9 @@ import * as http from 'node:http';
 import * as https from 'node:https';
 import * as stream from 'node:stream/promises';
 import { CsvError, parse } from 'csv-parse';
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// functional-programming style Result type, used instead of normal errors
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-// used to disambiguate Ok vs Fail
-export enum ResultType {
-  Ok = 'resulttype-ok',
-  Fail = 'resulttype-fail',
-}
-
-// Ok (success) type
-export interface Ok<T> {
-  type: typeof ResultType.Ok;
-  value: T;
-}
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const Ok = <T> (value: T): Ok<T> => ({ type: ResultType.Ok, value });
-
-// Fail (error) type
-export interface Fail<T> {
-  type: typeof ResultType.Fail;
-  value: T;
-}
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const Fail = <T> (value: T): Fail<T> => ({ type: ResultType.Fail, value });
-
-// success or failure type
-export type Result<L, R> = Ok<L> | Fail<R>;
+import {
+  Result, ResultType, Ok, Fail,
+} from './result.js';
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // HTTPS promise helpers
