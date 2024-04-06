@@ -1,5 +1,7 @@
 import 'dotenv/config';
+import { getObservations } from './airnow.js';
 import { createOverlay, drawMap } from './map.js';
+import { isOk } from './result.js';
 
 const e = process.env;
 
@@ -21,14 +23,24 @@ if (typeof e.AWS_PREFIX !== 'string') {
   envError('REFRESH_HOURS');
 } else {
   const main = async () => {
+    const center: [number, number] = [Number(e.LONGITUDE), Number(e.LATITUDE)];
+    const observations = await getObservations(e.AWS_PREFIX as string, new Date('2024-01-01T12:00:00Z'));
+    if (!isOk(observations)) { return; }
     const overlay = await createOverlay(
       './gis/roads.geojson',
       './gis/places.geojson',
-      [Number(e.LATITUDE), Number(e.LONGITUDE)],
+      center,
       1920,
       1080,
     );
-    await drawMap('map.png', [], overlay, 1920, 1080);
+    await drawMap(
+      'map.png',
+      observations.value,
+      overlay,
+      center,
+      1920,
+      1080,
+    );
   };
   main().then(() => console.log('done!'));
 }

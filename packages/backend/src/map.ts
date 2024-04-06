@@ -1,18 +1,19 @@
 import * as fs from 'node:fs/promises';
 import { Canvas, createCanvas } from 'canvas';
 import * as d3 from 'd3';
+import * as turf from '@turf/turf';
 
 import { Observation } from './airnow.js';
 // import { Result, Ok, isOk } from './result.js';
 
 
 function createProjection(
-  latitude: number,
-  longitude: number,
+  center: [number, number],
   width: number,
   height: number,
   zoom: number,
 ) {
+  const [longitude, latitude] = center;
   return d3.geoOrthographic()
     .rotate([-longitude, -latitude])
     .fitExtent(
@@ -43,8 +44,7 @@ export async function createOverlay(
   );
 
   // prep d3
-  const [lat, long] = center;
-  const projection = createProjection(lat, long, width, height, 10000);
+  const projection = createProjection(center, width, height, 10000);
   const path = d3.geoPath(projection, ctx);
 
   // render roads
@@ -82,6 +82,7 @@ export async function drawMap(
   filename: string,
   observations: Observation[],
   overlay: Canvas,
+  center: [number, number],
   width: number,
   height: number,
 ) {
@@ -89,9 +90,73 @@ export async function drawMap(
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext('2d');
 
-  ctx.fillStyle = '#ff0000';
+  ctx.fillStyle = '#00ffff';
   ctx.fillRect(0, 0, width, height);
+
+  const projection = createProjection(center, width, height, 10000);
+
+  // generate grid
+  console.log('create points feature');
+  const aqiPoints = turf.featureCollection(
+    observations.filter((o) => o.PM25_Measured === '1').map(
+      (o) => turf.point([Number(o.Longitude), Number(o.Latitude)], { aqi: Number(o.PM25_AQI) }),
+    ),
+  );
+  console.log('create grid');
+  const aqiGrid = turf.interpolate(aqiPoints, 5, { property: 'aqi', gridType: 'point' });
+  const path = d3.geoPath(projection, ctx);
+  // compute contours
+  console.log('compute contours');
+  const contourBands = turf.isobands(aqiGrid, [0, 50, 100, 150, 200, 300, 500], { zProperty: 'aqi' });
+  console.log('render contours');
+  contourBands.features.forEach((shape) => {
+    ctx.beginPath();
+    console.log(shape);
+    const aqi = shape.properties ? shape.properties.aqi : 500;
+    ctx.fillStyle = aqi === '300-500' ? 'maroon'
+      : aqi === '200-300' ? 'purple'
+        : aqi === '150-200' ? 'red'
+          : aqi === '100-150' ? 'orange'
+            : aqi === '50-100' ? 'yellow'
+              : 'green';
+    path(shape);
+    ctx.fill();
+  });
+  aqiGrid.features.forEach((shape) => {
+    ctx.beginPath();
+    console.log(shape);
+    const aqi = shape.properties ? shape.properties.aqi : 500;
+    ctx.fillStyle = aqi > 300 ? 'maroon'
+      : aqi > 200 ? 'purple'
+        : aqi > 150 ? 'red'
+          : aqi > 100 ? 'orange'
+            : aqi > 50 ? 'yellow'
+              : 'green';
+    path(shape);
+    ctx.fill();
+    ctx.stroke();
+  });
+  console.log('done with contours c:');
+
+
   ctx.drawImage(overlay, 0, 0);
+
+  observations.forEach((o) => {
+    ctx.beginPath();
+    const aqi = Number(o.PM25_Measured) ? Number(o.PM25_AQI) : 0;
+    ctx.fillStyle = aqi > 300 ? 'maroon'
+      : aqi > 200 ? 'purple'
+        : aqi > 150 ? 'red'
+          : aqi > 100 ? 'orange'
+            : aqi > 50 ? 'yellow'
+              : 'green';
+    const pos = projection([Number(o.Longitude), Number(o.Latitude)]);
+    const [x, y] = pos || [0, 0];
+    ctx.arc(x, y, 8, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.stroke();
+  });
+
 
   await fs.writeFile(filename, canvas.toBuffer('image/png'));
 }
