@@ -1,7 +1,5 @@
 import 'dotenv/config';
-import { getObservations, distanceFilter } from './airnow.js';
-import { createOverlay, drawMap } from './map.js';
-import { isOk } from './result.js';
+import { createOverlay, drawDate } from './map.js';
 
 const e = process.env;
 
@@ -24,8 +22,6 @@ if (typeof e.AWS_PREFIX !== 'string') {
 } else {
   const main = async () => {
     const center: [number, number] = [Number(e.LONGITUDE), Number(e.LATITUDE)];
-    const observations = await getObservations(e.AWS_PREFIX as string, new Date('2023-06-28T00:00:00Z'));
-    if (!isOk(observations)) { return; }
     const overlay = await createOverlay(
       './gis/roads.geojson',
       './gis/places.geojson',
@@ -33,13 +29,13 @@ if (typeof e.AWS_PREFIX !== 'string') {
       1920,
       1080,
     );
-    await drawMap(
-      'map.png',
-      observations.value.filter(distanceFilter(center, Number(e.RANGE))),
-      overlay,
+    await drawDate(
+      e.AWS_PREFIX as string,
       center,
-      1920,
-      1080,
+      Number(e.RANGE),
+      new Date('2023-06-28T12:00:00Z'),
+      overlay,
+      'map.png',
     );
   };
   main().then(() => console.log('done!'));

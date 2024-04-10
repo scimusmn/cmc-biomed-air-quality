@@ -4,8 +4,12 @@ import * as d3 from 'd3';
 import * as turf from '@turf/turf';
 
 // import interpolate from './interpolate.js';
-import { Observation } from './airnow.js';
-// import { Result, Ok, isOk } from './result.js';
+import { 
+  Observation,
+  getObservations,
+  distanceFilter 
+} from './airnow.js';
+import { isOk } from './result.js';
 
 
 function createProjection(
@@ -158,4 +162,28 @@ export async function drawMap(
 
 
   await fs.writeFile(filename, canvas.toBuffer('image/png'));
+}
+
+
+export async function drawDate(
+  awsPrefix: string, 
+  center: [number, number],
+  range: number,
+  date: Date,
+  overlay: Canvas,
+  filename: string,
+) {
+  const observations = await getObservations(awsPrefix, date);
+  if (!isOk(observations)) {
+    console.error(`failed to fetch data for ${date.toISOString()}`);
+    return;
+  }
+  await drawMap(
+    filename,
+    observations.value.filter(distanceFilter(center, range)),
+    overlay,
+    center,
+    1920,
+    1080,
+  );
 }
