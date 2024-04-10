@@ -3,6 +3,7 @@ import { Canvas, createCanvas } from 'canvas';
 import * as d3 from 'd3';
 import * as turf from '@turf/turf';
 
+// import interpolate from './interpolate.js';
 import { Observation } from './airnow.js';
 // import { Result, Ok, isOk } from './result.js';
 
@@ -103,7 +104,7 @@ export async function drawMap(
     ),
   );
   console.log('create grid');
-  const aqiGrid = turf.interpolate(aqiPoints, 5, { property: 'aqi', gridType: 'point' });
+  const aqiGrid = turf.interpolate(aqiPoints, 5, { property: 'aqi', gridType: 'point', weight: 5 });
   const path = d3.geoPath(projection, ctx);
   // compute contours
   console.log('compute contours');
@@ -112,26 +113,30 @@ export async function drawMap(
   contourBands.features.forEach((shape) => {
     ctx.beginPath();
     console.log(shape);
-    const aqi = shape.properties ? shape.properties.aqi : 500;
-    ctx.fillStyle = aqi === '300-500' ? 'maroon'
-      : aqi === '200-300' ? 'purple'
-        : aqi === '150-200' ? 'red'
-          : aqi === '100-150' ? 'orange'
-            : aqi === '50-100' ? 'yellow'
-              : 'green';
+    ctx.fillStyle = ((aqi) => {
+      if (aqi === '300-500') { return 'maroon'; }
+      if (aqi === '200-300') { return 'purple'; }
+      if (aqi === '150-200') { return 'red'; }
+      if (aqi === '100-150') { return 'orange'; }
+      if (aqi === '50-100') { return 'yellow'; }
+      return 'green';
+    })(shape.properties ? shape.properties.aqi : null);
     path(shape);
     ctx.fill();
   });
+
+  const aqiColor = (aqi: number) => {
+    if (aqi > 300) { return 'maroon'; }
+    if (aqi > 200) { return 'purple'; }
+    if (aqi > 150) { return 'red'; }
+    if (aqi > 100) { return 'orange'; }
+    if (aqi > 50) { return 'yellow'; }
+    return 'green';
+  };
+
   aqiGrid.features.forEach((shape) => {
     ctx.beginPath();
-    console.log(shape);
-    const aqi = shape.properties ? shape.properties.aqi : 500;
-    ctx.fillStyle = aqi > 300 ? 'maroon'
-      : aqi > 200 ? 'purple'
-        : aqi > 150 ? 'red'
-          : aqi > 100 ? 'orange'
-            : aqi > 50 ? 'yellow'
-              : 'green';
+    ctx.fillStyle = aqiColor(shape.properties ? shape.properties.aqi : 500);
     path(shape);
     ctx.fill();
     ctx.stroke();
@@ -143,13 +148,7 @@ export async function drawMap(
 
   observations.forEach((o) => {
     ctx.beginPath();
-    const aqi = Number(o.PM25_Measured) ? Number(o.PM25_AQI) : 0;
-    ctx.fillStyle = aqi > 300 ? 'maroon'
-      : aqi > 200 ? 'purple'
-        : aqi > 150 ? 'red'
-          : aqi > 100 ? 'orange'
-            : aqi > 50 ? 'yellow'
-              : 'green';
+    ctx.fillStyle = aqiColor(Number(o.PM25_Measured) ? Number(o.PM25_AQI) : 0);
     const pos = projection([Number(o.Longitude), Number(o.Latitude)]);
     const [x, y] = pos || [0, 0];
     ctx.arc(x, y, 8, 0, 2 * Math.PI);

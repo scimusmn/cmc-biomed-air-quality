@@ -211,10 +211,10 @@ const EARTH_RADIUS = 6378.137; // kilometers
 
 // create a filter function so that only observations within range pass the test
 export function distanceFilter(
-  latitude: number,
-  longitude: number,
+  center: [number, number],
   maxDistance: number,
 ): (o: Observation) => boolean {
+  const [longitude, latitude] = center;
   return (o: Observation) => {
     const distance = greatCircleDist(
       EARTH_RADIUS,
