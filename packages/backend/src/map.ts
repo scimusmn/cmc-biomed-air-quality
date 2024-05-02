@@ -138,6 +138,7 @@ export async function drawMap(
     return 'green';
   };
 
+  // Comment out to hide small debug dots
   aqiGrid.features.forEach((shape) => {
     ctx.beginPath();
     ctx.fillStyle = aqiColor(shape.properties ? shape.properties.aqi : 500);
@@ -150,6 +151,7 @@ export async function drawMap(
 
   ctx.drawImage(overlay, 0, 0);
 
+  // Comment out to hide large debug dots
   observations.forEach((o) => {
     ctx.beginPath();
     ctx.fillStyle = aqiColor(Number(o.PM25_Measured) ? Number(o.PM25_AQI) : 0);

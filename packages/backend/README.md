@@ -19,7 +19,7 @@ The `.env` file should contain the following parameters:
 | `DB_FILE`       | The name of the file to save the JSON database in.                                                        | airnowdb.json |
 | `LATITUDE`      | The latitude to center observations around.                                                               | 39.1 |
 | `LONGITUDE`     | The longitude to center observations around.                                                              | -84.5125 |
-| `RANGE`         | The maximum distance from the central lat/long; observations further away will not be included.           | 20 |
+| `RANGE`         | The maximum distance from the central lat/long in Kilometers; observations further away will not be included.           | 20 |
 | `REFRESH_HOURS` | The number of most recent observation hours to consider "stale" and update (in case new data has come in) | 4 |
 
 The database file should contain, before running for the first time just an empty array: `[]`.
