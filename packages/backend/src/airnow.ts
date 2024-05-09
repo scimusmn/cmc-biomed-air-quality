@@ -22,8 +22,8 @@ export enum Failure {
 // helper function for asynchronous HTTPS GET
 export function getStream(url: nodeUrl.URL): Promise<Result<http.IncomingMessage, Failure>> {
   return new Promise((resolve) => {
-    const req = https.get(url, (res) => resolve(Ok(res)));
-    req.on('error', () => resolve(Fail(Failure.HttpsRequest)));
+    const request = https.get(url, (res) => resolve(Ok(res)));
+    request.on('error', () => resolve(Fail(Failure.HttpsRequest)));
   });
 }
 
@@ -65,45 +65,16 @@ export interface Observation {
   SO2: string;
   SO2_Unit: string;
   PM10: string;
-  PM10_Unit : string;
+  PM10_Unit: string;
 }
 
 // Observation type guard
-export function isObservation(o: any): o is Observation {
-  if (typeof o.AQSID !== 'string') { return false; }
-  if (typeof o.SiteName !== 'string') { return false; }
-  if (typeof o.Status !== 'string') { return false; }
-  if (typeof o.EPARegion !== 'string') { return false; }
-  if (typeof o.Latitude !== 'string') { return false; }
-  if (typeof o.Longitude !== 'string') { return false; }
-  if (typeof o.Elevation !== 'string') { return false; }
-  if (typeof o.GMTOffset !== 'string') { return false; }
-  if (typeof o.CountryCode !== 'string') { return false; }
-  if (typeof o.StateName !== 'string') { return false; }
-  if (typeof o.ValidDate !== 'string') { return false; }
-  if (typeof o.ValidTime !== 'string') { return false; }
-  if (typeof o.DataSource !== 'string') { return false; }
-  if (typeof o.ReportingArea_PipeDelimited !== 'string') { return false; }
-  if (typeof o.OZONE_AQI !== 'string') { return false; }
-  if (typeof o.PM10_AQI !== 'string') { return false; }
-  if (typeof o.PM25_AQI !== 'string') { return false; }
-  if (typeof o.NO2_AQI !== 'string') { return false; }
-  if (typeof o.OZONE_Measured !== 'string') { return false; }
-  if (typeof o.PM10_Measured !== 'string') { return false; }
-  if (typeof o.PM25_Measured !== 'string') { return false; }
-  if (typeof o.NO2_Measured !== 'string') { return false; }
-  if (typeof o.PM25 !== 'string') { return false; }
-  if (typeof o.PM25_Unit !== 'string') { return false; }
-  if (typeof o.OZONE !== 'string') { return false; }
-  if (typeof o.OZONE_Unit !== 'string') { return false; }
-  if (typeof o.NO2 !== 'string') { return false; }
-  if (typeof o.NO2_Unit !== 'string') { return false; }
-  if (typeof o.CO !== 'string') { return false; }
-  if (typeof o.CO_Unit !== 'string') { return false; }
-  if (typeof o.SO2 !== 'string') { return false; }
-  if (typeof o.SO2_Unit !== 'string') { return false; }
-  if (typeof o.PM10 !== 'string') { return false; }
-  if (typeof o.PM10_Unit !== 'string') { return false; }
+export function isObservation(observation: any): observation is Observation {
+  for (const property in observation) {
+    if (typeof observation[property] !== 'string') {
+      return false;
+    }
+  }
   return true;
 }
 
@@ -120,12 +91,12 @@ export async function getObservations(
   date: Date,
 ): Promise<Result<Observation[], Failure>> {
   // construct appropriate URL
-  const d = toUtc(date);
-  const z = (x: number) => String(x).padStart(2, '0');
-  const yyyy = String(d.getFullYear());
-  const mm = z(d.getMonth() + 1);
-  const dd = z(d.getDate());
-  const HH = z(d.getHours());
+  const utcDate = toUtc(date);
+  const zeroPad = (x: number) => String(x).padStart(2, '0');
+  const yyyy = String(utcDate.getFullYear());
+  const mm = zeroPad(utcDate.getMonth() + 1);
+  const dd = zeroPad(utcDate.getDate());
+  const HH = zeroPad(utcDate.getHours());
   const dateStr = `${yyyy}${mm}${dd}`;
   const url = new nodeUrl.URL(
     `${aws}${yyyy}/${dateStr}/HourlyAQObs_${dateStr}${HH}.dat`,
@@ -133,47 +104,40 @@ export async function getObservations(
 
   // build CSV parsing pipeline
   const csv = parse({
-    delimiter: ',',
+    columns: true,
   });
   const records: string[][] = [];
   csv.on('readable', () => {
     // consume records as long as they are available
-    for (let r = csv.read(); r !== null; r = csv.read()) {
-      records.push(r);
+    let record;
+    while ((record = csv.read()) !== null) {
+      records.push(record);
     }
   });
 
   // perform the actual GET and pipe thru CSV parser
-  const msg = await getStream(url);
-  if (msg.type === ResultType.Fail) {
-    return msg;
+  const message = await getStream(url);
+  if (message.type === ResultType.Fail) {
+    return message;
   }
-  msg.value.pipe(csv);
+  message.value.pipe(csv);
   try {
     await stream.finished(csv);
-  } catch (err) {
+  } catch (error) {
     // nicer Result error handling c:
-    if (msg.value.statusCode !== 200) {
+    if (message.value.statusCode !== 200) {
       return Fail(Failure.HttpsResponse);
-    } if (err instanceof CsvError) {
+    } if (error instanceof CsvError) {
       return Fail(Failure.ParsePipeline);
     }
     return Fail(Failure.Unknown);
   }
 
-  // map each parsed record to Observation
-  const keys: Record<string, number> = {};
-  (records[0] || []).forEach((k, i) => { keys[k] = i; });
-  const k = (r: string[], key: string) => r[keys[key] || r.length] || '';
-  const observations: Observation[] = records.slice(1).map((r) => {
-    const o: any = {};
-    Object.keys(keys).forEach((key) => {
-      o[key] = k(r, key);
-    });
-    if (isObservation(o)) {
-      return o;
+  const observations: Observation[] = records.map((record) => {
+    if (isObservation(record)) {
+      return record;
     }
-    throw new Error(`invalid record: ${r}`);
+    throw new Error(`invalid record: ${record}`);
   });
 
   // done
