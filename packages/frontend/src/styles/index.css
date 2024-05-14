@@ -1,3 +1,16 @@
+/* Variables */
+:root {
+  --darkblue: #00415c;
+  --lightblue: #88b0cd;
+  --teal: #005874;
+  --lightteal: #97d2dd;
+}
+
+/* Core Styles */
+html {
+  background: black;
+}
+
 html,
 body {
   height: 100%;
@@ -5,5 +18,58 @@ body {
 }
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: black;
+  color: white;
+  height: 1080px;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+  user-select: none;
+  width: 1920px;
+}
+
+/* Layout Styles */
+.wrap {
+  height: 1080px;
+  width: 100%;
+}
+
+.header {
+  background-color: var(--darkblue);
+  height: 150px;
+  width: 100%;
+
+  h1 {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.content-wrap {
+  display: flex;
+  height: 100%;
+  min-height: 100%;
+
+  .left-col {
+    background-color: var(--teal);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 360px;
+
+    .toggles,
+    .legend {
+      height: 100%;
+    }
+
+    .toggles {
+      border-bottom: 1px solid #fff;
+    }
+  }
+
+  .right-col {
+    background-color: var(--lightblue);
+    height: 100%;
+    width: calc(100% - 360px);
+  }
 }
