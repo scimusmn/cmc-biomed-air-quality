@@ -47,8 +47,7 @@ body {
 
 .content-wrap {
   display: flex;
-  height: 100%;
-  min-height: 100%;
+  height: calc(100% - 150px);
 
   .left-col {
     background-color: var(--teal);
@@ -60,6 +59,7 @@ body {
     .toggles,
     .legend {
       height: 100%;
+      padding: 59px 56px;
     }
 
     .toggles {
@@ -68,8 +68,53 @@ body {
   }
 
   .right-col {
-    background-color: var(--lightblue);
+    background-color: var(--lightteal);
     height: 100%;
     width: calc(100% - 360px);
+
+    figure {
+      margin: 0;
+      padding: 0;
+    }
+
+    .scrubber {
+      background-color: var(--lightteal);
+      height: 70px;
+      width: 100%;
+    }
   }
+}
+
+/* Faux Progress Bar Styles */
+figcaption {
+  align-items: center;
+  height: 15px;
+  padding: 26px 50px;
+}
+
+/* Fallback stuff */
+progress[value] {
+  appearance: none;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 2px 3px rgba(0 0 0 25%) inset;
+  color: dodgerblue;
+  display: inline;
+  height: 15px;
+  order: 1;
+  position: relative;
+  width: 100%;
+}
+
+/* WebKit styles */
+progress[value]::-webkit-progress-bar {
+  background-color: #97d2dd;
+  border: 2px solid #005874;
+  border-radius: 10px;
+}
+
+progress[value]::-webkit-progress-value {
+  background: #005874;
+  border-radius: 10px;
+  position: relative;
 }
