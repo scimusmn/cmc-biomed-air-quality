@@ -16,7 +16,33 @@ function Home() {
           </div>
 
           <div className="legend">
-            Legend
+            <h3>Legend</h3>
+
+            <div className="legend-item">
+              <span className="circle good" />
+              <h5>Good</h5>
+            </div>
+            <div className="legend-item">
+              <span className="circle moderate" />
+              <h5>Moderate</h5>
+            </div>
+            <div className="legend-item">
+              <span className="circle unhealthy-sensitive" />
+              <h5>Unhealthy for Sensitive Groups</h5>
+            </div>
+            <div className="legend-item">
+              <span className="circle unhealthy" />
+              <h5>Unhealthy</h5>
+            </div>
+            <div className="legend-item">
+              <span className="circle very-unhealthy" />
+              <h5>Very Unhealthy</h5>
+            </div>
+            <div className="legend-item">
+              <span className="circle hazardous" />
+              <h5>Hazardous</h5>
+            </div>
+
           </div>
         </div>
 

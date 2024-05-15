@@ -6,6 +6,32 @@
   --lightteal: #97d2dd;
 }
 
+@font-face {
+  font-family: "Ropa Soft PTT";
+  font-weight: 700;
+  src: url("/fonts/Ropa-Soft-PTT-Bold.ttf");
+}
+
+@font-face {
+  font-family: "Ropa Soft PTT";
+  font-style: italic;
+  font-weight: 700;
+  src: url("/fonts/Ropa-Soft-PTT-Bold-Italic.ttf");
+}
+
+@font-face {
+  font-family: "Ropa Soft PTT";
+  font-style: italic;
+  font-weight: 800;
+  src: url("/fonts/Ropa-Soft-PTT-ExtraBold-Italic.ttf");
+}
+
+@font-face {
+  font-family: "Avenir Next Condensed";
+  font-weight: 600;
+  src: url("/fonts/Avenir-Next-Condensed-Demi-Bold.ttf");
+}
+
 /* Core Styles */
 html {
   background: black;
@@ -36,12 +62,19 @@ body {
 
 .header {
   background-color: var(--darkblue);
+  display: flex;
+  flex-direction: column;
   height: 150px;
+  justify-content: end;
   width: 100%;
 
   h1 {
+    font-family: "Ropa Soft PTT", sans-serif;
+    font-size: 60px;
+    font-style: italic;
+    font-weight: 800;
     margin: 0;
-    padding: 0;
+    padding: 0 0 25px 70px;
   }
 }
 
@@ -59,11 +92,50 @@ body {
     .toggles,
     .legend {
       height: 100%;
-      padding: 59px 56px;
     }
 
     .toggles {
       border-bottom: 1px solid #fff;
+      padding: 59px 56px;
+    }
+
+    .legend {
+      padding: 59px 20px 59px 56px;
+
+      h3 {
+        font-family: "Ropa Soft PTT", sans-serif;
+        font-size: 35px;
+        margin: 0 0 13px;
+        padding: 0;
+      }
+
+      .legend-item {
+        align-items: center;
+        display: flex;
+        margin: 0 0 10px;
+
+        h5 {
+          font-family: "Avenir Next Condensed", sans-serif;
+          font-size: 20px;
+          margin: 4px 0 0;
+          padding: 0;
+        }
+
+        .circle {
+          border-radius: 50%;
+          display: block;
+          height: 24px;
+          margin-right: 10px;
+          width: 24px;
+
+          &.good { background-color: #e5e5e5; }
+          &.moderate { background-color: #fff200; }
+          &.unhealthy-sensitive { background-color: #fe5f1a; }
+          &.unhealthy { background-color: #be1e2d; }
+          &.very-unhealthy { background-color: #823660; }
+          &.hazardous { background-color: #262262; }
+        }
+      }
     }
   }
 
