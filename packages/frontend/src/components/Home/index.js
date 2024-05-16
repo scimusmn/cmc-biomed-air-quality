@@ -13,10 +13,11 @@ function Home() {
       <div className="content-wrap">
         <div className="left-col">
           <div className="toggles">
-            Toggles
+            {/* Toggles */}
           </div>
 
           <div className="legend">
+            {/* Legend */}
             <h3>Legend</h3>
             <LegendItem legendClass="good" legendTitle="Good" />
             <LegendItem legendClass="moderate" legendTitle="Moderate" />
@@ -28,6 +29,7 @@ function Home() {
         </div>
 
         <div className="right-col">
+          {/* VideoPlayer */}
           <VideoPlayer currentSelection="/map-assets/one-day-loop.mp4" />
         </div>
       </div>
