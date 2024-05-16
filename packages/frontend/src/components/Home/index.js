@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import React from 'react';
 import VideoPlayer from '../VideoPlayer';
+import LegendItem from '../LegendItem';
 
 function Home() {
   return (
@@ -17,32 +18,12 @@ function Home() {
 
           <div className="legend">
             <h3>Legend</h3>
-
-            <div className="legend-item">
-              <span className="circle good" />
-              <h5>Good</h5>
-            </div>
-            <div className="legend-item">
-              <span className="circle moderate" />
-              <h5>Moderate</h5>
-            </div>
-            <div className="legend-item">
-              <span className="circle unhealthy-sensitive" />
-              <h5>Unhealthy for Sensitive Groups</h5>
-            </div>
-            <div className="legend-item">
-              <span className="circle unhealthy" />
-              <h5>Unhealthy</h5>
-            </div>
-            <div className="legend-item">
-              <span className="circle very-unhealthy" />
-              <h5>Very Unhealthy</h5>
-            </div>
-            <div className="legend-item">
-              <span className="circle hazardous" />
-              <h5>Hazardous</h5>
-            </div>
-
+            <LegendItem legendClass="good" legendTitle="Good" />
+            <LegendItem legendClass="moderate" legendTitle="Moderate" />
+            <LegendItem legendClass="unhealthy-sensitive" legendTitle="Unhealthy for Sensitive Groups" />
+            <LegendItem legendClass="unhealthy" legendTitle="Unhealthy" />
+            <LegendItem legendClass="very-unhealthy" legendTitle="Very Unhealthy" />
+            <LegendItem legendClass="hazardous" legendTitle="Hazardous" />
           </div>
         </div>
 
