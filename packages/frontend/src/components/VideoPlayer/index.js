@@ -2,15 +2,14 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 
-function VideoPlayer(props) {
-  const { currentSelection } = props;
+function VideoPlayer({ currentSelection }) {
   const videoRef = useRef(null);
   const progressRef = useRef(null);
 
   useEffect(() => {
     const video = videoRef.current;
     const progress = progressRef.current;
-
+    videoRef.current.load();
     const updateProgress = () => {
       const value = Math.round((video.currentTime / video.duration) * 100);
       progress.value = value;
@@ -19,12 +18,12 @@ function VideoPlayer(props) {
     video.addEventListener('timeupdate', updateProgress);
 
     return () => video.removeEventListener('timeupdate', updateProgress);
-  }, []);
+  }, [currentSelection]);
 
   return (
     <div>
       <figure>
-        <video autoPlay muted loop id="video" ref={videoRef}>
+        <video key={currentSelection} autoPlay muted loop id="video" ref={videoRef}>
           <source src={currentSelection} type="video/mp4" />
         </video>
         <figcaption>
@@ -36,7 +35,7 @@ function VideoPlayer(props) {
 }
 
 VideoPlayer.propTypes = {
-  currentSelection: PropTypes.objectOf(PropTypes.any).isRequired,
+  currentSelection: PropTypes.string.isRequired,
 };
 
 export default VideoPlayer;

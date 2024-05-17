@@ -1,9 +1,24 @@
 /* eslint-disable jsx-a11y/media-has-caption */
-import React from 'react';
+import React, { useState } from 'react';
 import VideoPlayer from '../VideoPlayer';
 import LegendItem from '../LegendItem';
 
 function Home() {
+  // State to hold the current video URL
+  const [currentVideo, setCurrentVideo] = useState('/map-assets/one-day-loop.mp4');
+
+  // Array of video objects
+  const videos = [
+    { url: '/map-assets/one-day-loop.mp4', title: '24 hour loop' },
+    { url: '/map-assets/ten-day-loop.mp4', title: '10 day loop' },
+    { url: '/map-assets/one-year-loop.mp4', title: '1 year loop' },
+  ];
+
+  // Function to change the video
+  const changeVideo = (videoUrl) => {
+    setCurrentVideo(videoUrl);
+  };
+
   return (
     <div className="wrap">
       <div className="header">
@@ -13,11 +28,19 @@ function Home() {
       <div className="content-wrap">
         <div className="left-col">
           <div className="toggles">
-            {/* Toggles */}
+            {videos.map((video) => (
+              <button
+                key={video.url} // Use the video URL as the key
+                type="button"
+                onClick={() => changeVideo(video.url)}
+                className={currentVideo === video.url ? 'active' : ''}
+              >
+                {video.title}
+              </button>
+            ))}
           </div>
 
           <div className="legend">
-            {/* Legend */}
             <h3>Legend</h3>
             <LegendItem legendClass="good" legendTitle="Good" />
             <LegendItem legendClass="moderate" legendTitle="Moderate" />
@@ -30,7 +53,7 @@ function Home() {
 
         <div className="right-col">
           {/* VideoPlayer */}
-          <VideoPlayer currentSelection="/map-assets/one-day-loop.mp4" />
+          <VideoPlayer currentSelection={currentVideo} />
         </div>
       </div>
     </div>
