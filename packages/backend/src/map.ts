@@ -90,13 +90,24 @@ export async function drawMap(
   width: number,
   height: number,
 ) {
+
+  // Legend colors
+  const legend = {
+    good: '#E5E5E5', // gray
+    moderate: '#FFF200', // yellow
+    unhealthySensitive: '#FE5F1A', // orange
+    unhealthy: '#BE1E2D', // red
+    veryUnhealthy: '#823660', // purple
+    hazardous: '#262262', // dark purple
+  };
+  
   const aqiLevels = {
-    0: 'green',
-    50: 'yellow',
-    100: 'orange',
-    150: 'red',
-    200: 'purple',
-    300: 'maroon',
+    0: legend.good,
+    50: legend.moderate,
+    100: legend.unhealthySensitive,
+    150: legend.unhealthy,
+    200: legend.veryUnhealthy,
+    300: legend.hazardous,
     500: 'black',
   };
 
