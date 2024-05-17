@@ -147,6 +147,11 @@ body {
     figure {
       margin: 0;
       padding: 0;
+
+      video {
+        height: 854px;
+        width: 1560px;
+      }
     }
 
     .scrubber {

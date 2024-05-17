@@ -5,7 +5,22 @@ import LegendItem from '../LegendItem';
 
 function Home() {
   // State to hold the current video URL
-  const [currentVideo, setCurrentVideo] = useState('/map-assets/one-day-loop.mp4');
+  const [showMap, setShowMap] = useState(true);
+  const [showVideoPlayer, setShowVideoPlayer] = useState(false);
+  const [currentVideo, setCurrentVideo] = useState(false);
+
+  // Function to change to the map img
+  const changeToMap = () => {
+    setShowMap(true);
+    setShowVideoPlayer(false);
+  };
+
+  // Function to change to a video
+  const changeToVideo = (videoUrl) => {
+    setShowMap(false);
+    setShowVideoPlayer(true);
+    setCurrentVideo(videoUrl);
+  };
 
   // Array of video objects
   const videos = [
@@ -13,11 +28,6 @@ function Home() {
     { url: '/map-assets/ten-day-loop.mp4', title: '10 day loop' },
     { url: '/map-assets/one-year-loop.mp4', title: '1 year loop' },
   ];
-
-  // Function to change the video
-  const changeVideo = (videoUrl) => {
-    setCurrentVideo(videoUrl);
-  };
 
   return (
     <div className="wrap">
@@ -28,12 +38,15 @@ function Home() {
       <div className="content-wrap">
         <div className="left-col">
           <div className="toggles">
+
+            <button type="button" className={showMap === true ? 'active' : ''} onClick={changeToMap}>Current</button>
+
             {videos.map((video) => (
               <button
                 key={video.url} // Use the video URL as the key
                 type="button"
-                onClick={() => changeVideo(video.url)}
-                className={currentVideo === video.url ? 'active' : ''}
+                onClick={() => changeToVideo(video.url)}
+                className={currentVideo === video.url && showMap === false ? 'active' : ''}
               >
                 {video.title}
               </button>
@@ -52,8 +65,11 @@ function Home() {
         </div>
 
         <div className="right-col">
-          {/* VideoPlayer */}
-          <VideoPlayer currentSelection={currentVideo} />
+          {/* Map Image */}
+          {showMap ? <img src="/map-assets/current.png" alt="Current Map" /> : null}
+
+          {/* Video Player */}
+          {showVideoPlayer ? <VideoPlayer currentSelection={currentVideo} /> : null}
         </div>
       </div>
     </div>
