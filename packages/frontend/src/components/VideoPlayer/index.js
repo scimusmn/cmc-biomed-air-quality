@@ -11,8 +11,11 @@ function VideoPlayer({ currentSelection }) {
     const progress = progressRef.current;
     videoRef.current.load();
     const updateProgress = () => {
-      const value = Math.round((video.currentTime / video.duration) * 100);
-      progress.value = value;
+      let value = (video.currentTime / video.duration) * 100;
+      if (Number.isNaN(value)) {
+        value = 0.1;
+      }
+      progress.value = parseFloat(value);
     };
 
     video.addEventListener('timeupdate', updateProgress);
