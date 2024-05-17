@@ -1,3 +1,42 @@
+/* Variables */
+:root {
+  --darkblue: #00415c;
+  --lightblue: #88b0cd;
+  --teal: #005874;
+  --lightteal: #97d2dd;
+}
+
+@font-face {
+  font-family: "Ropa Soft PTT";
+  font-weight: 700;
+  src: url("/fonts/Ropa-Soft-PTT-Bold.ttf");
+}
+
+@font-face {
+  font-family: "Ropa Soft PTT";
+  font-style: italic;
+  font-weight: 700;
+  src: url("/fonts/Ropa-Soft-PTT-Bold-Italic.ttf");
+}
+
+@font-face {
+  font-family: "Ropa Soft PTT";
+  font-style: italic;
+  font-weight: 800;
+  src: url("/fonts/Ropa-Soft-PTT-ExtraBold-Italic.ttf");
+}
+
+@font-face {
+  font-family: "Avenir Next Condensed";
+  font-weight: 600;
+  src: url("/fonts/Avenir-Next-Condensed-Demi-Bold.ttf");
+}
+
+/* Core Styles */
+html {
+  background: black;
+}
+
 html,
 body {
   height: 100%;
@@ -5,5 +44,149 @@ body {
 }
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: black;
+  color: white;
+  height: 1080px;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+  user-select: none;
+  width: 1920px;
+}
+
+/* Layout Styles */
+.wrap {
+  height: 1080px;
+  width: 100%;
+}
+
+.header {
+  background-color: var(--darkblue);
+  display: flex;
+  flex-direction: column;
+  height: 150px;
+  justify-content: end;
+  width: 100%;
+
+  h1 {
+    font-family: "Ropa Soft PTT", sans-serif;
+    font-size: 60px;
+    font-style: italic;
+    font-weight: 800;
+    margin: 0;
+    padding: 0 0 25px 70px;
+  }
+}
+
+.content-wrap {
+  display: flex;
+  height: calc(100% - 150px);
+
+  .left-col {
+    background-color: var(--teal);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 360px;
+
+    .toggles,
+    .legend {
+      height: 100%;
+    }
+
+    .toggles {
+      border-bottom: 1px solid #fff;
+      padding: 59px 56px;
+    }
+
+    .legend {
+      padding: 59px 20px 59px 56px;
+
+      h3 {
+        font-family: "Ropa Soft PTT", sans-serif;
+        font-size: 35px;
+        margin: 0 0 13px;
+        padding: 0;
+      }
+
+      .legend-item {
+        align-items: center;
+        display: flex;
+        margin: 0 0 10px;
+
+        h5 {
+          font-family: "Avenir Next Condensed", sans-serif;
+          font-size: 20px;
+          margin: 4px 0 0;
+          padding: 0;
+        }
+
+        .circle {
+          border-radius: 50%;
+          display: block;
+          height: 24px;
+          margin-right: 10px;
+          width: 24px;
+
+          &.good { background-color: #e5e5e5; }
+          &.moderate { background-color: #fff200; }
+          &.unhealthy-sensitive { background-color: #fe5f1a; }
+          &.unhealthy { background-color: #be1e2d; }
+          &.very-unhealthy { background-color: #823660; }
+          &.hazardous { background-color: #262262; }
+        }
+      }
+    }
+  }
+
+  .right-col {
+    background-color: var(--lightteal);
+    height: 100%;
+    width: calc(100% - 360px);
+
+    figure {
+      margin: 0;
+      padding: 0;
+    }
+
+    .scrubber {
+      background-color: var(--lightteal);
+      height: 70px;
+      width: 100%;
+    }
+  }
+}
+
+/* Faux Progress Bar Styles */
+figcaption {
+  align-items: center;
+  height: 15px;
+  padding: 26px 50px;
+}
+
+/* Fallback stuff */
+progress[value] {
+  appearance: none;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 2px 3px rgba(0 0 0 25%) inset;
+  color: dodgerblue;
+  display: inline;
+  height: 15px;
+  order: 1;
+  position: relative;
+  width: 100%;
+}
+
+/* WebKit styles */
+progress[value]::-webkit-progress-bar {
+  background-color: #97d2dd;
+  border: 2px solid #005874;
+  border-radius: 10px;
+}
+
+progress[value]::-webkit-progress-value {
+  background: #005874;
+  border-radius: 10px;
+  position: relative;
 }
