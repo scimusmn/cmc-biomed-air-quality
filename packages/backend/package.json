@@ -1,9 +1,14 @@
 {
   "dependencies": {
     "@turf/turf": "^6.5.0",
+    "@types/d3": "^7.4.3",
     "bottleneck": "^2.19.5",
-    "csv-parse": "^5.5.3",
-    "dotenv": "^16.4.4"
+    "canvas": "^2.11.2",
+    "csv-parse": "^5.5.5",
+    "d3": "^7.9.0",
+    "dotenv": "^16.4.5",
+    "fluent-ffmpeg": "^2.1.2",
+    "tmp": "^0.2.3"
   },
   "name": "backend",
   "version": "1.0.0",
@@ -11,18 +16,20 @@
   "author": "sanine",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^20.11.19",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
-    "eslint": "8.2.0",
+    "@types/fluent-ffmpeg": "^2.1.24",
+    "@types/node": "^20.12.8",
+    "@types/tmp": "^0.2.6",
+    "@typescript-eslint/eslint-plugin": "^7.8.0",
+    "@typescript-eslint/parser": "^7.8.0",
+    "eslint": "9.2.0",
     "eslint-config-airbnb": "19.0.4",
     "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-config-airbnb-typescript": "^17.1.0",
-    "eslint-plugin-import": "2.25.3",
-    "eslint-plugin-jsx-a11y": "6.5.1",
-    "eslint-plugin-react": "7.28.0",
-    "eslint-plugin-react-hooks": "4.3.0",
-    "typescript": "^5.3.3"
+    "eslint-config-airbnb-typescript": "^18.0.0",
+    "eslint-plugin-import": "2.29.1",
+    "eslint-plugin-jsx-a11y": "6.8.0",
+    "eslint-plugin-react": "7.34.1",
+    "eslint-plugin-react-hooks": "4.6.2",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "yarn run tsc",

@@ -28,4 +28,5 @@ export const Fail = <T> (value: T): Fail<T> => ({ type: ResultType.Fail, value }
 export type Result<L, R> = Ok<L> | Fail<R>;
 
 export const isOk = <L, R>(result: Result<L, R>): result is Ok<L> => result.type === ResultType.Ok;
+/* eslint-disable-next-line max-len */
 export const isFail = <L, R>(result: Result<L, R>): result is Fail<R> => result.type === ResultType.Fail;
