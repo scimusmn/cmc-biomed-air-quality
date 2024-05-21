@@ -1,5 +1,5 @@
 import * as fs from 'node:fs/promises';
-import { Canvas, createCanvas } from 'canvas';
+import { Canvas, createCanvas, registerFont } from 'canvas';
 import * as d3 from 'd3';
 import * as turf from '@turf/turf';
 
@@ -34,9 +34,13 @@ export async function createOverlay(
   width: number,
   height: number,
 ): Promise<Canvas> {
+
+  // load fonts
+  registerFont('fonts/Avenir-Next-Condensed-Demi-Bold.ttf', { family: 'Avenir' });
+
   // create canvas
   const canvas = createCanvas(width, height);
-  const context = canvas.getContext('2d');
+  const context = canvas.getContext('2d');  
 
   // load roads + cities geoJSON
   const [roads, cities] = <[d3.ExtendedFeature[], d3.ExtendedFeature[]]>await Promise.all(
@@ -62,20 +66,36 @@ export async function createOverlay(
   });
 
   // render city labels
-  context.fillStyle = '#000000';
-  context.strokeStyle = '#ffffff';
-  context.lineWidth = 2;
+  const majorCities = ["Cincinnati", "Louisville", "Indianapolis", "Columbus"];
+  
   cities.forEach((city) => {
     // draw map label
     const { NAME_EN, SCALERANK } = city.properties as any;
-    context.font = `${70 / (SCALERANK + 1)}px sans-serif`;
+    let cityLabel = NAME_EN;
+    if (majorCities.includes(NAME_EN)) {
+      // major city labels
+      context.font = '24px "Avenir"';
+      context.fillStyle = '#00415C';
+      context.strokeStyle = '#00415C';
+      context.lineWidth = 0;
+      cityLabel = cityLabel.toUpperCase();
+      // context.letterSpacing = "10px"; // missing feature: https://github.com/Automattic/node-canvas/issues/1014
+      const hairSpace = '\u200A';
+      cityLabel = cityLabel.split('').join(hairSpace); // Add hair spaces to simulate letter-spacing
+    } else {
+      // minor city labels
+      context.fillStyle = '#000000';
+      context.strokeStyle = '#ffffff';
+      context.lineWidth = 2;
+      context.font = `${70 / (SCALERANK + 1)}px sans-serif`;
+    }
     const metrics = context.measureText(NAME_EN);
     const position = projection(
       city.geometry ? (city.geometry as any).coordinates as [number, number] : [0, 0],
     );
     const [x, y] = position || [0, 0];
-    context.strokeText(NAME_EN, x - (metrics.width / 2), y);
-    context.fillText(NAME_EN, x - (metrics.width / 2), y);
+    context.strokeText(cityLabel, x - (metrics.width / 2), y);
+    context.fillText(cityLabel, x - (metrics.width / 2), y);
   });
 
   return canvas;
@@ -90,13 +110,24 @@ export async function drawMap(
   width: number,
   height: number,
 ) {
+
+  // Legend colors
+  const legend = {
+    good: '#E5E5E5', // gray
+    moderate: '#FFF200', // yellow
+    unhealthySensitive: '#FE5F1A', // orange
+    unhealthy: '#BE1E2D', // red
+    veryUnhealthy: '#823660', // purple
+    hazardous: '#262262', // dark purple
+  };
+  
   const aqiLevels = {
-    0: 'green',
-    50: 'yellow',
-    100: 'orange',
-    150: 'red',
-    200: 'purple',
-    300: 'maroon',
+    0: legend.good,
+    50: legend.moderate,
+    100: legend.unhealthySensitive,
+    150: legend.unhealthy,
+    200: legend.veryUnhealthy,
+    300: legend.hazardous,
     500: 'black',
   };
 
