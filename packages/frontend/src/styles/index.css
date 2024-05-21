@@ -72,7 +72,14 @@ body {
   flex-direction: column;
   height: 150px;
   justify-content: end;
+  position: relative;
   width: 100%;
+
+  .status-icon {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+  }
 
   &.modal-active {
     opacity: 0.5;
