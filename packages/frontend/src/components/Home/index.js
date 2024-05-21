@@ -2,24 +2,35 @@
 import React, { useState } from 'react';
 import VideoPlayer from '../VideoPlayer';
 import LegendItem from '../LegendItem';
+import Modal from '../Modal';
 
 function Home() {
   // State to hold the current video URL
   const [showMap, setShowMap] = useState(true);
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [currentVideo, setCurrentVideo] = useState(false);
 
   // Function to change to the map img
   const changeToMap = () => {
     setShowMap(true);
     setShowVideoPlayer(false);
+    setShowModal(false);
   };
 
   // Function to change to a video
   const changeToVideo = (videoUrl) => {
     setShowMap(false);
+    setShowModal(false);
     setShowVideoPlayer(true);
     setCurrentVideo(videoUrl);
+  };
+
+  // Function to change to a modal
+  const changeToModal = () => {
+    setShowMap(false);
+    setShowVideoPlayer(false);
+    setShowModal(true);
   };
 
   // Array of video objects
@@ -31,14 +42,13 @@ function Home() {
 
   return (
     <div className="wrap">
-      <div className="header">
+      <div className={showModal === true ? 'header modal-active' : 'header'}>
         <h1>Interactive Map of Regional Air Quality</h1>
       </div>
 
       <div className="content-wrap">
         <div className="left-col">
-          <div className="toggles">
-
+          <div className={showModal === true ? 'toggles modal-active' : 'toggles'}>
             <button type="button" className={showMap === true ? 'active' : ''} onClick={changeToMap}>Current</button>
 
             {videos.map((video) => (
@@ -46,14 +56,14 @@ function Home() {
                 key={video.url} // Use the video URL as the key
                 type="button"
                 onClick={() => changeToVideo(video.url)}
-                className={currentVideo === video.url && showMap === false ? 'active' : ''}
+                className={currentVideo === video.url && showMap === false && showModal === false ? 'active' : ''}
               >
                 {video.title}
               </button>
             ))}
           </div>
 
-          <div className="legend">
+          <div className={showModal === true ? 'legend modal-active' : 'legend'}>
             <h3>Legend</h3>
             <LegendItem legendClass="good" legendTitle="Good" />
             <LegendItem legendClass="moderate" legendTitle="Moderate" />
@@ -61,6 +71,13 @@ function Home() {
             <LegendItem legendClass="unhealthy" legendTitle="Unhealthy" />
             <LegendItem legendClass="very-unhealthy" legendTitle="Very Unhealthy" />
             <LegendItem legendClass="hazardous" legendTitle="Hazardous" />
+          </div>
+
+          <div className="modal-cta-wrap">
+            <button type="button" className="action-button" onClick={() => changeToModal()}>
+              <span className="action-info-icon">!</span>
+              Action Day Info
+            </button>
           </div>
         </div>
 
@@ -70,6 +87,9 @@ function Home() {
 
           {/* Video Player */}
           {showVideoPlayer ? <VideoPlayer currentSelection={currentVideo} /> : null}
+
+          {/* Modal */}
+          {showModal ? <Modal /> : null}
         </div>
       </div>
     </div>
