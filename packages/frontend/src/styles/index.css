@@ -129,7 +129,7 @@ body {
 
     .legend {
       background-color: var(--teal);
-      padding: 50px 20px 50px 56px;
+      padding: 55px 20px 55px 56px;
 
       &.modal-active {
         opacity: 0.5;
