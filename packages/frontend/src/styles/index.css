@@ -32,6 +32,12 @@
   src: url("/fonts/Avenir-Next-Condensed-Demi-Bold.ttf");
 }
 
+@font-face {
+  font-family: Avenir;
+  font-weight: 500;
+  src: url("/fonts/Avenir.ttf");
+}
+
 /* Core Styles */
 html {
   background: black;
@@ -44,7 +50,7 @@ body {
 }
 
 body {
-  background-color: black;
+  background-color: white;
   color: white;
   height: 1080px;
   margin: 0;
@@ -66,7 +72,18 @@ body {
   flex-direction: column;
   height: 150px;
   justify-content: end;
+  position: relative;
   width: 100%;
+
+  .status-icon {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+  }
+
+  &.modal-active {
+    opacity: 0.5;
+  }
 
   h1 {
     font-family: "Ropa Soft PTT", sans-serif;
@@ -83,24 +100,47 @@ body {
   height: calc(100% - 150px);
 
   .left-col {
-    background-color: var(--teal);
     display: flex;
     flex-direction: column;
     height: 100%;
     width: 360px;
 
-    .toggles,
-    .legend {
-      height: 100%;
-    }
-
     .toggles {
+      background-color: var(--teal);
       border-bottom: 1px solid #fff;
-      padding: 59px 56px;
+      padding: 56px 56px 44px;
+
+      &.modal-active {
+        opacity: 0.5;
+      }
+
+      button {
+        background: none;
+        border: 1px solid #fff;
+        border-radius: 5px;
+        color: #fff;
+        cursor: pointer;
+        display: block;
+        font-family: "Ropa Soft PTT", sans-serif;
+        font-size: 35px;
+        margin-bottom: 20px;
+        outline: inherit;
+        padding: 10px;
+        width: 100%;
+
+        &.active {
+          background-color: var(--darkblue);
+        }
+      }
     }
 
     .legend {
-      padding: 59px 20px 59px 56px;
+      background-color: var(--teal);
+      padding: 55px 20px 55px 56px;
+
+      &.modal-active {
+        opacity: 0.5;
+      }
 
       h3 {
         font-family: "Ropa Soft PTT", sans-serif;
@@ -137,6 +177,36 @@ body {
         }
       }
     }
+
+    .modal-cta-wrap {
+      background: var(--darkblue);
+      border-top: 1px solid white;
+      height: 78px;
+      padding: 20px 36px;
+
+      .action-button {
+        background: none;
+        border: none;
+        color: white;
+        font-family: "Avenir Next Condensed", sans-serif;
+        font-size: 20px;
+        text-align: left;
+        text-transform: uppercase;
+        width: 100%;
+
+        .action-info-icon {
+          border: 3px solid white;
+          border-radius: 50%;
+          color: white;
+          display: inline-block;
+          font-size: 20px;
+          height: 24px;
+          margin-right: 14px;
+          text-align: center;
+          width: 24px;
+        }
+      }
+    }
   }
 
   .right-col {
@@ -159,25 +229,53 @@ body {
       height: 70px;
       width: 100%;
     }
-  }
-}
 
-button {
-  background: none;
-  border: 1px solid #fff;
-  border-radius: 5px;
-  color: #fff;
-  cursor: pointer;
-  display: block;
-  font-family: "Ropa Soft PTT", sans-serif;
-  font-size: 35px;
-  margin-bottom: 20px;
-  outline: inherit;
-  padding: 10px;
-  width: 100%;
+    .modal-wrap {
+      align-items: center;
+      background: #e4e4e4;
+      display: flex;
+      height: 854px;
+      justify-content: center;
+      width: 1560px;
 
-  &.active {
-    background-color: var(--darkblue);
+      .modal-content {
+        background: white;
+        color: var(--darkblue);
+        font-family: Avenir, sans-serif;
+        height: 460px;
+        padding: 60px 100px;
+        width: 640px;
+
+        h3 {
+          align-items: center;
+          display: flex;
+          font-family: "Avenir Next Condensed", sans-serif;
+          font-size: 48px;
+          font-weight: 400;
+          justify-content: center;
+          margin: 0 0 40px;
+          text-transform: uppercase;
+
+          .action-icon {
+            border: 2px solid var(--darkblue);
+            border-radius: 50%;
+            color: var(--darkblue);
+            display: inline-block;
+            font-size: 48px;
+            height: 57px;
+            margin-bottom: 5px;
+            margin-right: 14px;
+            text-align: center;
+            width: 57px;
+          }
+        }
+
+        p {
+          font-size: 24px;
+          font-weight: 500;
+        }
+      }
+    }
   }
 }
 
