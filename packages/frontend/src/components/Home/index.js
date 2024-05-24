@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/media-has-caption */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useIdleTimer } from 'react-idle-timer';
 import VideoPlayer from '../VideoPlayer';
 import LegendItem from '../LegendItem';
@@ -67,15 +67,24 @@ function Home() {
     startResetTimer();
   };
 
-  let hash = '';
-  const generateHash = () => {
-    const date = new Date();
-    const currentHour = date.getHours();
-    hash = `hash-${currentHour}`;
-  };
+  const [uniqueTime, setUniqueTime] = useState('');
 
-  generateHash();
-  setInterval(generateHash, 1000 * 60 * 60);
+  useEffect(() => {
+    const generateTimestamp = () => {
+      const date = new Date();
+      const currentHour = date.getHours();
+      const currentDay = date.getDate();
+      const currentMonth = date.getMonth();
+      const currentYear = date.getFullYear();
+      setUniqueTime(`hash-${currentYear}-${currentMonth}-${currentDay}-${currentHour}`);
+    };
+
+    generateTimestamp();
+    const intervalId = setInterval(generateTimestamp, 1000 * 60 * 60);
+
+    // Cleanup function to clear the interval when the component unmounts
+    return () => clearInterval(intervalId);
+  }, []);
 
   return (
     <div className="wrap">
@@ -122,7 +131,7 @@ function Home() {
         <div className="right-col">
           {/* Map Image */}
 
-          {showMap ? <img src={`/map-assets/current.png?${hash}`} alt="Current Map" /> : null}
+          {showMap ? <img src={`/map-assets/current.png?${uniqueTime}`} alt="Current Map" /> : null}
 
           {/* Video Player */}
           {showVideoPlayer ? <VideoPlayer currentSelection={currentVideo} /> : null}
