@@ -76,7 +76,7 @@ function Home() {
       const currentDay = date.getDate();
       const currentMonth = date.getMonth();
       const currentYear = date.getFullYear();
-      setUniqueTime(`hash-${currentYear}-${currentMonth}-${currentDay}-${currentHour}`);
+      setUniqueTime(`date-${currentYear}-${currentMonth}-${currentDay}-${currentHour}`);
     };
 
     generateTimestamp();
