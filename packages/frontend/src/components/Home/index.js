@@ -90,7 +90,7 @@ function Home() {
     <div className="wrap">
       <div className={showModal === true ? 'header modal-active' : 'header'}>
         <h1>Interactive Map of Regional Air Quality</h1>
-        <img className="status-icon" src="/map-assets/status-icon.png" alt="Status Icon" />
+        <img className="status-icon" src={`/map-assets/status-icon.png?${dateStamp}`} alt="Status Icon" />
       </div>
 
       <div className="content-wrap">
