@@ -138,7 +138,14 @@ function Home() {
             ? <VideoPlayer currentSelection={currentVideo} dateStamp={dateStamp} /> : null}
 
           {/* Modal */}
-          {showModal ? <Modal /> : null}
+          {showModal
+            ? (
+              <Modal
+                setShowModal={setShowModal}
+                setShowVideoPlayer={setShowVideoPlayer}
+              />
+            )
+            : null}
         </div>
       </div>
     </div>

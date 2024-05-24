@@ -1,10 +1,28 @@
 /* eslint-disable jsx-a11y/media-has-caption */
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
+import PropTypes from 'prop-types';
 
-function Modal() {
+function Modal({ setShowModal, setShowVideoPlayer }) {
+  const modalContentRef = useRef();
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (modalContentRef.current && !modalContentRef.current.contains(event.target)) {
+        setShowModal(false);
+        setShowVideoPlayer(true);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <div className="modal-wrap">
-      <div className="modal-content">
+      <div className="modal-content" ref={modalContentRef}>
         <h3>
           <span className="action-icon">!</span>
           Action Day Info
@@ -25,4 +43,8 @@ function Modal() {
   );
 }
 
+Modal.propTypes = {
+  setShowModal: PropTypes.bool.isRequired,
+  setShowVideoPlayer: PropTypes.bool.isRequired,
+};
 export default Modal;
