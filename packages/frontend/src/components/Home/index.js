@@ -67,6 +67,16 @@ function Home() {
     startResetTimer();
   };
 
+  let hash = '';
+  const generateHash = () => {
+    const date = new Date();
+    const currentHour = date.getHours();
+    hash = `hash-${currentHour}`;
+  };
+
+  generateHash();
+  setInterval(generateHash, 1000 * 60 * 60);
+
   return (
     <div className="wrap">
       <div className={showModal === true ? 'header modal-active' : 'header'}>
@@ -111,7 +121,8 @@ function Home() {
 
         <div className="right-col">
           {/* Map Image */}
-          {showMap ? <img src="/map-assets/current.png" alt="Current Map" /> : null}
+
+          {showMap ? <img src={`/map-assets/current.png?${hash}`} alt="Current Map" /> : null}
 
           {/* Video Player */}
           {showVideoPlayer ? <VideoPlayer currentSelection={currentVideo} /> : null}
