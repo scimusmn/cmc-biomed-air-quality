@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/media-has-caption */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useIdleTimer } from 'react-idle-timer';
 import VideoPlayer from '../VideoPlayer';
 import LegendItem from '../LegendItem';
@@ -67,11 +67,30 @@ function Home() {
     startResetTimer();
   };
 
+  // Function to generate a timestamp
+  const [dateStamp, setDateStamp] = useState('');
+  useEffect(() => {
+    const generateTimestamp = () => {
+      const date = new Date();
+      const currentHour = date.getHours();
+      const currentDay = date.getDate();
+      const currentMonth = date.getMonth();
+      const currentYear = date.getFullYear();
+      setDateStamp(`date-${currentYear}-${currentMonth}-${currentDay}-${currentHour}`);
+    };
+
+    generateTimestamp();
+    const intervalId = setInterval(generateTimestamp, 1000 * 60 * 60);
+
+    // Cleanup function to clear the interval when the component unmounts
+    return () => clearInterval(intervalId);
+  }, []);
+
   return (
     <div className="wrap">
       <div className={showModal === true ? 'header modal-active' : 'header'}>
         <h1>Interactive Map of Regional Air Quality</h1>
-        <img className="status-icon" src="/map-assets/status-icon.png" alt="Status Icon" />
+        <img className="status-icon" src={`/map-assets/status-icon.png?${dateStamp}`} alt="Status Icon" />
       </div>
 
       <div className="content-wrap">
@@ -111,10 +130,12 @@ function Home() {
 
         <div className="right-col">
           {/* Map Image */}
-          {showMap ? <img src="/map-assets/current.png" alt="Current Map" /> : null}
+
+          {showMap ? <img src={`/map-assets/current.png?${dateStamp}`} alt="Current Map" /> : null}
 
           {/* Video Player */}
-          {showVideoPlayer ? <VideoPlayer currentSelection={currentVideo} /> : null}
+          {showVideoPlayer
+            ? <VideoPlayer currentSelection={currentVideo} dateStamp={dateStamp} /> : null}
 
           {/* Modal */}
           {showModal ? <Modal /> : null}

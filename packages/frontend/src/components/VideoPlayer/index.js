@@ -2,7 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 
-function VideoPlayer({ currentSelection }) {
+function VideoPlayer({ currentSelection, dateStamp }) {
   const videoRef = useRef(null);
   const progressRef = useRef(null);
 
@@ -27,7 +27,7 @@ function VideoPlayer({ currentSelection }) {
     <div>
       <figure>
         <video key={currentSelection} autoPlay muted loop id="video" ref={videoRef}>
-          <source src={currentSelection} type="video/mp4" />
+          <source src={`${currentSelection}?${dateStamp}`} type="video/mp4" />
         </video>
         <figcaption>
           <progress id="progress" max="100" value="0" ref={progressRef}>Progress</progress>
@@ -39,6 +39,7 @@ function VideoPlayer({ currentSelection }) {
 
 VideoPlayer.propTypes = {
   currentSelection: PropTypes.string.isRequired,
+  dateStamp: PropTypes.string.isRequired,
 };
 
 export default VideoPlayer;
