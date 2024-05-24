@@ -5,11 +5,18 @@ import LegendItem from '../LegendItem';
 import Modal from '../Modal';
 
 function Home() {
+  // Array of video objects
+  const videos = [
+    { url: '/map-assets/one-day-loop.mp4', title: '24 hour loop' },
+    { url: '/map-assets/ten-day-loop.mp4', title: '10 day loop' },
+    { url: '/map-assets/one-year-loop.mp4', title: '1 year loop' },
+  ];
+
   // State to hold the current video URL
-  const [showMap, setShowMap] = useState(true);
-  const [showVideoPlayer, setShowVideoPlayer] = useState(false);
+  const [showMap, setShowMap] = useState(false);
+  const [showVideoPlayer, setShowVideoPlayer] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [currentVideo, setCurrentVideo] = useState(false);
+  const [currentVideo, setCurrentVideo] = useState(videos[1].url);
 
   // Function to change to the map img
   const changeToMap = () => {
@@ -32,13 +39,6 @@ function Home() {
     setShowVideoPlayer(false);
     setShowModal(true);
   };
-
-  // Array of video objects
-  const videos = [
-    { url: '/map-assets/one-day-loop.mp4', title: '24 hour loop' },
-    { url: '/map-assets/ten-day-loop.mp4', title: '10 day loop' },
-    { url: '/map-assets/one-year-loop.mp4', title: '1 year loop' },
-  ];
 
   return (
     <div className="wrap">
