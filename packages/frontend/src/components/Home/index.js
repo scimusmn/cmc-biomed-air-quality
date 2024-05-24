@@ -67,7 +67,7 @@ function Home() {
     startResetTimer();
   };
 
-  const [uniqueTime, setUniqueTime] = useState('');
+  const [dateStamp, setDateStamp] = useState('');
 
   useEffect(() => {
     const generateTimestamp = () => {
@@ -76,7 +76,7 @@ function Home() {
       const currentDay = date.getDate();
       const currentMonth = date.getMonth();
       const currentYear = date.getFullYear();
-      setUniqueTime(`date-${currentYear}-${currentMonth}-${currentDay}-${currentHour}`);
+      setDateStamp(`date-${currentYear}-${currentMonth}-${currentDay}-${currentHour}`);
     };
 
     generateTimestamp();
@@ -131,11 +131,11 @@ function Home() {
         <div className="right-col">
           {/* Map Image */}
 
-          {showMap ? <img src={`/map-assets/current.png?${uniqueTime}`} alt="Current Map" /> : null}
+          {showMap ? <img src={`/map-assets/current.png?${dateStamp}`} alt="Current Map" /> : null}
 
           {/* Video Player */}
           {showVideoPlayer
-            ? <VideoPlayer currentSelection={currentVideo} dateStamp={uniqueTime} /> : null}
+            ? <VideoPlayer currentSelection={currentVideo} dateStamp={dateStamp} /> : null}
 
           {/* Modal */}
           {showModal ? <Modal /> : null}
