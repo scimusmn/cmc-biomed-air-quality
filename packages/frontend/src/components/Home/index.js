@@ -67,8 +67,8 @@ function Home() {
     startResetTimer();
   };
 
+  // Function to generate a timestamp
   const [dateStamp, setDateStamp] = useState('');
-
   useEffect(() => {
     const generateTimestamp = () => {
       const date = new Date();
