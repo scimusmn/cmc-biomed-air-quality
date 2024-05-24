@@ -134,7 +134,8 @@ function Home() {
           {showMap ? <img src={`/map-assets/current.png?${uniqueTime}`} alt="Current Map" /> : null}
 
           {/* Video Player */}
-          {showVideoPlayer ? <VideoPlayer currentSelection={currentVideo} /> : null}
+          {showVideoPlayer
+            ? <VideoPlayer currentSelection={currentVideo} dateStamp={uniqueTime} /> : null}
 
           {/* Modal */}
           {showModal ? <Modal /> : null}
