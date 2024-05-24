@@ -30,7 +30,7 @@ function Home() {
   // Idle Timer Start
   const { start } = useIdleTimer({
     timeout: 1000 * 60 * 4, // 4 minutes
-    onIdle: () => onIdle(),
+    onIdle,
     startManually: true,
   });
 
