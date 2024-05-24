@@ -1,5 +1,6 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import React, { useState } from 'react';
+import { useIdleTimer } from 'react-idle-timer';
 import VideoPlayer from '../VideoPlayer';
 import LegendItem from '../LegendItem';
 import Modal from '../Modal';
@@ -17,12 +18,36 @@ function Home() {
   const [showVideoPlayer, setShowVideoPlayer] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [currentVideo, setCurrentVideo] = useState(videos[1].url);
+  const [startReset, setStartReset] = useState(false);
+
+  // Function to reload the page when idle
+  const onIdle = () => {
+    if (typeof window !== 'undefined') {
+      window.location.reload();
+    }
+  };
+
+  // Idle Timer Start
+  const { start } = useIdleTimer({
+    timeout: 1000 * 60 * 4, // 4 minutes
+    onIdle: () => onIdle(),
+    startManually: true,
+  });
+
+  // Function to start the reset timer after startReset gets set to true (click happened)
+  const startResetTimer = () => {
+    if (startReset === false) {
+      setStartReset(true);
+      start();
+    }
+  };
 
   // Function to change to the map img
   const changeToMap = () => {
     setShowMap(true);
     setShowVideoPlayer(false);
     setShowModal(false);
+    startResetTimer();
   };
 
   // Function to change to a video
@@ -31,6 +56,7 @@ function Home() {
     setShowModal(false);
     setShowVideoPlayer(true);
     setCurrentVideo(videoUrl);
+    startResetTimer();
   };
 
   // Function to change to a modal
@@ -38,6 +64,7 @@ function Home() {
     setShowMap(false);
     setShowVideoPlayer(false);
     setShowModal(true);
+    startResetTimer();
   };
 
   return (
