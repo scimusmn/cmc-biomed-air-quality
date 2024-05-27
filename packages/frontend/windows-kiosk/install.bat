@@ -1,5 +1,10 @@
-# This should be placed in the parent directory of the source code repository
-# Double-click this file after making content edits to rebuild the application with new content
+# This installation script will place and configure the launch files inside the Windows startup folder
 
-cd ./tpt-skillsville-kiosk
-npm run rebuild-kiosk
+# Copy launch-kiosk.bat to startup folder
+copy /Y "C:\Users\exhibits\Documents\SMM\Dev\cmc-biomed-air-quality\packages\frontend\windows-kiosk\launch-kiosk.bat" "C:\Users\exhibits\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\launch-kiosk.bat"
+
+# Copy startup.bat to startup folder
+copy /Y "C:\Users\exhibits\Documents\SMM\Dev\cmc-biomed-air-quality\packages\frontend\windows-kiosk\startup.bat" "C:\Users\exhibits\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\startup.bat"
+
+# Open the Startup folder to confirm startup files are in the correct location
+explorer "C:\Users\exhibits\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup"
