@@ -42,7 +42,7 @@ if (typeof environment.AWS_PREFIX !== 'string') {
       height,
     );
 
-    const staticMapAssets = '../frontend/static/map-assets';
+    const staticMapAssets = '../frontend/public/map-assets';
 
     const videos = [
       {
