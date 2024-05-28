@@ -1,3 +1,5 @@
+/* stylelint-disable property-no-unknown */
+
 /* Variables */
 :root {
   --darkblue: #00415c;
@@ -64,6 +66,11 @@ body {
 .wrap {
   height: 1080px;
   width: 100%;
+}
+
+img {
+  -webkit-user-drag: none;
+  user-drag: none;
 }
 
 .header {
