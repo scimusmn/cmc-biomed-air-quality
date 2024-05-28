@@ -61,10 +61,15 @@ function Home() {
 
   // Function to change to a modal
   const changeToModal = () => {
-    setShowMap(false);
-    setShowVideoPlayer(false);
-    setShowModal(true);
-    startResetTimer();
+    if (showModal === true) {
+      setShowModal(false);
+      setShowVideoPlayer(true);
+    } else {
+      setShowMap(false);
+      setShowVideoPlayer(false);
+      setShowModal(true);
+      startResetTimer();
+    }
   };
 
   // Function to generate a timestamp
