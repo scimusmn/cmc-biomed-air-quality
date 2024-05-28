@@ -1,20 +1,24 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import React, { useRef, useEffect } from 'react';
+import PropTypes from 'prop-types';
 
-function Modal() {
+function Modal({ handleClickOutside }) {
   const modalContentRef = useRef();
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutsideEvent = (event) => {
       if (modalContentRef.current && !modalContentRef.current.contains(event.target)) {
-        handleClickOutside();
+        // If we click anything except the action button, close the modal.
+        if (event.target.className !== 'action-button') {
+          handleClickOutside();
+        }
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutsideEvent);
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutsideEvent);
     };
   }, []);
 
@@ -40,5 +44,9 @@ function Modal() {
     </div>
   );
 }
+
+Modal.propTypes = {
+  handleClickOutside: PropTypes.func.isRequired,
+};
 
 export default Modal;
