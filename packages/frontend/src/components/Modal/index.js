@@ -1,15 +1,13 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import React, { useRef, useEffect } from 'react';
-import PropTypes from 'prop-types';
 
-function Modal({ setShowModal, setShowVideoPlayer }) {
+function Modal() {
   const modalContentRef = useRef();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (modalContentRef.current && !modalContentRef.current.contains(event.target)) {
-        setShowModal(false);
-        setShowVideoPlayer(true);
+        handleClickOutside();
       }
     };
 
@@ -43,8 +41,4 @@ function Modal({ setShowModal, setShowVideoPlayer }) {
   );
 }
 
-Modal.propTypes = {
-  setShowModal: PropTypes.bool.isRequired,
-  setShowVideoPlayer: PropTypes.bool.isRequired,
-};
 export default Modal;

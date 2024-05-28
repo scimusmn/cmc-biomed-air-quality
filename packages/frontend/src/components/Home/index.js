@@ -140,9 +140,10 @@ function Home() {
           {/* Modal */}
           {showModal
             ? (
-              <Modal
-                setShowModal={setShowModal}
-                setShowVideoPlayer={setShowVideoPlayer}
+              <Modal handleClickOutside={() => {
+                setShowModal(false);
+                setShowVideoPlayer(true);
+              }}
               />
             )
             : null}
