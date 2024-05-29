@@ -1,10 +1,30 @@
 /* eslint-disable jsx-a11y/media-has-caption */
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
+import PropTypes from 'prop-types';
 
-function Modal() {
+function Modal({ handleClickOutside }) {
+  const modalContentRef = useRef();
+
+  useEffect(() => {
+    const handleClickOutsideEvent = (event) => {
+      if (modalContentRef.current && !modalContentRef.current.contains(event.target)) {
+        // If we click anything except the action button, close the modal.
+        if (event.target.className !== 'action-button') {
+          handleClickOutside();
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutsideEvent);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutsideEvent);
+    };
+  }, []);
+
   return (
     <div className="modal-wrap">
-      <div className="modal-content">
+      <div className="modal-content" ref={modalContentRef}>
         <h3>
           <span className="action-icon">!</span>
           Action Day Info
@@ -24,5 +44,9 @@ function Modal() {
     </div>
   );
 }
+
+Modal.propTypes = {
+  handleClickOutside: PropTypes.func.isRequired,
+};
 
 export default Modal;
