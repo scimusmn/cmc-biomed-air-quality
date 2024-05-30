@@ -30,15 +30,21 @@ function Modal({ handleClickOutside }) {
           Action Day Info
         </h3>
         <p>
-          Lorem ipsum dolor sit amet, consectetuer adipiscing elit,
-          ed diam nonummy nibh euismod tincidunt ut laoreet dolore
-          magna aliquam erat volutpat. Ut wisi enim ad minim veniam,
-          quis nostrud exerci tation ullamcorper suscipit lobortis nisl
-          ut aliquip ex ea commodo consequat. Duis autem vel eum iriure
-          dolor in hendrerit in vulputate velit esse molestie consequat,
-          vel illum dolore eu feugiat nulla facilisis at vero eros et
-          accumsan et iusto odio dignissim qui blandit praesent luptatum
-          zzril delenit augue duis dolore te feugait nulla facilisi.
+          When the number of particles in the air is dangerous to breathe,
+          regional or state agencies issue Air Quality Advisories.
+        </p>
+        <p>The Advisory may reflect high levels of:</p>
+        <ul>
+          <li>ground-level ozone</li>
+          <li>particulate matter</li>
+          <li>carbon monoxide</li>
+          <li>sulfur dioxide</li>
+          <li>nitrogen dioxide</li>
+          <li>or a combination of these pollutants.</li>
+        </ul>
+        <p>
+          During an Advisory, limit the time you spend outside.
+          Avoid activities that add particles to the air, such as driving and mowing the lawn.
         </p>
       </div>
     </div>
