@@ -27,7 +27,7 @@ function Modal({ handleClickOutside }) {
       <div className="modal-content" ref={modalContentRef}>
         <h3>
           <span className="action-icon">!</span>
-          Action Day Info
+          Air Quality Advisory
         </h3>
         <p>
           When the number of particles in the air is dangerous to breathe,

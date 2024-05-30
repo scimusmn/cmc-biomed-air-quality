@@ -128,7 +128,7 @@ function Home() {
           <div className="modal-cta-wrap">
             <button type="button" className="action-button" onClick={() => changeToModal()}>
               <span className="action-info-icon">!</span>
-              Action Day Info
+              Air Quality Advisory
             </button>
           </div>
         </div>
