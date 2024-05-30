@@ -201,6 +201,11 @@ img {
         text-transform: uppercase;
         width: 100%;
 
+        &:focus-visible {
+          border: none;
+          outline: none;
+        }
+
         .action-info-icon {
           border: 3px solid white;
           border-radius: 50%;
