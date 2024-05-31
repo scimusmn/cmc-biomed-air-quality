@@ -44,7 +44,7 @@ yarn start:compiled
 - `src/map.ts`: generates images containing a map of the area and the AQI data overlayed using D3.
 - `src/result.ts`: functional-programming style Result types for handling AirNow data.
 - `src/video.ts`: generates the video loops (which are concatenated map images) using FFmpeg.
-- `gis/places.geojson`: GeoJSON file containing places that are used to build the map.
-- `gis/roads.geojson`: GeoJSON file containing roads that are used to build the map.
+- `gis/places.geojson`: [GeoJSON file](https://github.com/nvkelso/natural-earth-vector/blob/master/geojson/ne_10m_populated_places.geojson) from [Natural Earth](https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-populated-places/) containing places that are used to build the map.
+- `gis/roads.geojson`: [GeoJSON file](https://github.com/nvkelso/natural-earth-vector/blob/master/geojson/ne_10m_roads.geojson) from [Natural Earth](https://www.naturalearthdata.com/downloads/10m-cultural-vectors/roads/) containing roads that are used to build the map.
 - `img/status-icon-empty.png`: a 1x1 icon used to indicate that the most recently downloaded AirNow data is current (within a threshold).
 - `img/status-icon.png`: a "failed" status icon used to indicate that the most recently downloaded AirNow data is stale (outside the threshold).
