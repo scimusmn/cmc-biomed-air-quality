@@ -122,7 +122,7 @@ img {
       }
 
       button {
-        background: var(--teal);
+        background: none;
         border: 1px solid #fff;
         border-radius: 5px;
         color: #fff;
