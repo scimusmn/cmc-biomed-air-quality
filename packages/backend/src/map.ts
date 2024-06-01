@@ -37,7 +37,7 @@ export async function createOverlay(
 
   // load fonts
   registerFont('fonts/Avenir-Next-Condensed-Demi-Bold.ttf', { family: 'Avenir' });
-
+  
   // create canvas
   const canvas = createCanvas(width, height);
   const context = canvas.getContext('2d');  
@@ -74,7 +74,7 @@ export async function createOverlay(
     let cityLabel = NAME_EN;
     if (majorCities.includes(NAME_EN)) {
       // major city labels
-      context.font = '24px "Avenir"';
+      context.font = '24px "Avenir Next Condensed Demi Bold"';
       context.fillStyle = '#00415C';
       context.strokeStyle = '#00415C';
       context.lineWidth = 0;
