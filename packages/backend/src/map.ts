@@ -36,8 +36,8 @@ export async function createOverlay(
 ): Promise<Canvas> {
 
   // load fonts
-  registerFont('fonts/Avenir-Next-Condensed-Demi-Bold.ttf', { family: 'Avenir' });
-  
+  registerFont('fonts/RopaSoftPro-ExtraBold.ttf', { family: 'Ropa' });
+
   // create canvas
   const canvas = createCanvas(width, height);
   const context = canvas.getContext('2d');  
@@ -74,14 +74,13 @@ export async function createOverlay(
     let cityLabel = NAME_EN;
     if (majorCities.includes(NAME_EN)) {
       // major city labels
-      context.font = '24px "Avenir Next Condensed Demi Bold"';
+      context.font = '24px "Ropa"';
       context.fillStyle = '#00415C';
-      context.strokeStyle = '#00415C';
+      context.strokeStyle = 'rgba(0,0,0,0)';
       context.lineWidth = 0;
-      cityLabel = cityLabel.toUpperCase();
-      // context.letterSpacing = "10px"; // missing feature: https://github.com/Automattic/node-canvas/issues/1014
-      const hairSpace = '\u200A';
-      cityLabel = cityLabel.split('').join(hairSpace); // Add hair spaces to simulate letter-spacing
+      // const hairSpace = '\u200A';
+      // Inject hair spaces to simulate letter-spacing (https://github.com/Automattic/node-canvas/issues/1014)
+      // cityLabel = cityLabel.split('').join(hairSpace);
     } else {
       // minor city labels
       context.fillStyle = '#000000';
