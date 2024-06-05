@@ -23,10 +23,23 @@ function VideoPlayer({ currentSelection, dateStamp }) {
     return () => video.removeEventListener('timeupdate', updateProgress);
   }, [currentSelection]);
 
+  // Possible fix for "stuck" video looping issue
+  useEffect(() => {
+    const video = videoRef.current;
+    const loopVideo = () => {
+      video.currentTime = 0;
+      video.play();
+    };
+
+    video.addEventListener('ended', loopVideo);
+
+    return () => video.removeEventListener('ended', loopVideo);
+  }, [currentSelection]);
+
   return (
     <div>
       <figure>
-        <video key={currentSelection} autoPlay muted loop id="video" ref={videoRef}>
+        <video key={currentSelection} autoPlay muted id="video" ref={videoRef}>
           <source src={`${currentSelection}?${dateStamp}`} type="video/mp4" />
         </video>
         <figcaption>
