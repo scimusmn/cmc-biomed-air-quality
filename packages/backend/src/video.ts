@@ -1,6 +1,7 @@
 import ffmpeg from 'fluent-ffmpeg';
 import fs from 'fs';
 import tmp from 'tmp';
+import path from 'node:path';
 
 export async function createVideoFromImages(
   imagePaths: string[],
@@ -10,7 +11,7 @@ export async function createVideoFromImages(
   size: string,
   fps: number
 ) {
-  const tempFile = tmp.fileSync({ tmpdir: './' });
+  const tempImageListFile = tmp.fileSync({ tmpdir: './' });
 
   const fileListContent = [];
   for (const imagePath of imagePaths) {
@@ -18,20 +19,24 @@ export async function createVideoFromImages(
     fileListContent.push(`duration ${lengthInSeconds / imagePaths.length}`);
   }
 
-  fs.writeFileSync(tempFile.name, fileListContent.join('\n'));
+  fs.writeFileSync(tempImageListFile.name, fileListContent.join('\n'));
+
+  const tempVideoFile = tmp.fileSync({ tmpdir: './', postfix: path.parse(outputPath).ext });
 
   const command = ffmpeg()
-    .input(tempFile.name)
+    .input(tempImageListFile.name)
     .inputFormat('concat')
     .videoBitrate(videoBitrate)
     .size(size)
     .fps(fps)
-    .output(outputPath);
+    .output(tempVideoFile.name);
 
   try {
     command.on('end', () => {
       console.log('Video created successfully:', outputPath);
-      fs.unlinkSync(tempFile.name);
+      fs.copyFileSync(tempVideoFile.name, outputPath);
+      fs.unlinkSync(tempVideoFile.name);
+      fs.unlinkSync(tempImageListFile.name);
     })
       .on('error', (err) => console.error('Error:', err))
       .run();
