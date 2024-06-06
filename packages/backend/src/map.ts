@@ -66,21 +66,25 @@ export async function createOverlay(
   });
 
   // render city labels
-  const majorCities = ["Cincinnati", "Louisville", "Indianapolis", "Columbus"];
+  const majorCities = ["Cincinnati", "Louisville", "Indianapolis", "Columbus", "Lexington", "Pittsburgh"];
+  const hideCities = ["Johnstown", "Lynchburg", "Danville", "St. Louis", "New Albany", "Belleville", "Edwardsville"];
   
   cities.forEach((city) => {
     // draw map label
     const { NAME_EN, SCALERANK } = city.properties as any;
     let cityLabel = NAME_EN;
+
+    // Skip cities that should be hidden
+    if (hideCities.includes(NAME_EN)) {
+      return;
+    }
+
     if (majorCities.includes(NAME_EN)) {
       // major city labels
       context.font = '24px "Ropa"';
       context.fillStyle = '#00415C';
       context.strokeStyle = 'rgba(0,0,0,0)';
       context.lineWidth = 0;
-      // const hairSpace = '\u200A';
-      // Inject hair spaces to simulate letter-spacing (https://github.com/Automattic/node-canvas/issues/1014)
-      // cityLabel = cityLabel.split('').join(hairSpace);
     } else {
       // minor city labels
       context.fillStyle = '#000000';
